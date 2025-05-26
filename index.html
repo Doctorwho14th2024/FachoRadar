@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FachoRadar - Surveillance Citoyenne</title>
+  
+  <!-- Favicon et thème -->
+  <link rel="icon" type="image/svg+xml" href="/img/favicon.svg">
+  <link rel="icon" type="image/png" href="/img/favicon.png">
+  <meta name="theme-color" content="#ef4444">
+  
+  <!-- Métadonnées -->
+  <meta name="description" content="Plateforme de surveillance citoyenne pour identifier et répertorier les contenus extrémistes">
+  <meta name="application-name" content="FachoRadar">
+  
+  <!-- Styles -->
+  <link href="/style.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gradient-to-br from-gray-900 to-black text-gray-100 min-h-screen font-sans">
+  <div class="max-w-4xl mx-auto p-6">
+    <header class="flex items-center justify-between mb-12 bg-gray-800/50 p-6 rounded-xl backdrop-blur-sm border border-gray-700/50">
+      <div class="flex items-center gap-4">
+        <div id="connectionStatus" class="absolute top-2 right-2 flex items-center gap-2 text-sm">
+          <span class="inline-block w-2 h-2 rounded-full bg-yellow-500"></span>
+          <span class="text-gray-400">Connexion...</span>
+        </div>
+        <div class="bg-red-500 p-3 rounded-lg">
+          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-3xl font-bold bg-gradient-to-r from-red-500 to-red-300 bg-clip-text text-transparent">FachoRadar</h1>
+          <p class="text-gray-400 text-sm">Surveillance Citoyenne Active</p>
+        </div>
+      </div>
+      <div class="text-sm text-gray-400">
+        Base de données citoyenne
+      </div>
+    </header>
+
+    <div class="grid md:grid-cols-2 gap-8">
+      <!-- Formulaire d'ajout -->
+      <form id="fachoForm" class="bg-gray-800/50 p-6 rounded-xl shadow-lg backdrop-blur-sm border border-gray-700/50 order-2 md:order-1">
+        <h2 class="text-2xl font-semibold mb-6 flex items-center gap-2">
+          <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Signaler un compte
+        </h2>
+        
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-400 mb-1">Pseudo TikTok</label>
+            <input name="pseudo" required 
+              class="w-full p-3 bg-gray-900/50 text-white rounded-lg border border-gray-700/50 focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-colors" 
+              placeholder="@pseudo" />
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-400 mb-1">Lien du compte</label>
+            <input name="lien" required type="url" 
+              class="w-full p-3 bg-gray-900/50 text-white rounded-lg border border-gray-700/50 focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-colors" 
+              placeholder="https://tiktok.com/@..." />
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-400 mb-1">Preuves et contexte</label>
+            <textarea name="preuve" required rows="4"
+              class="w-full p-3 bg-gray-900/50 text-white rounded-lg border border-gray-700/50 focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-colors" 
+              placeholder="Décrivez les propos ou comportements problématiques..."></textarea>
+          </div>
+        </div>
+
+        <div class="mt-6 flex items-center justify-between">
+          <p id="message" class="text-sm"></p>
+          <button type="submit" 
+            class="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white px-6 py-2 rounded-lg font-medium shadow-lg shadow-red-500/20 transition-all transform hover:scale-105">
+            Signaler
+          </button>
+        </div>
+      </form>
+
+      <!-- Liste et recherche -->
+      <div class="order-1 md:order-2">
+        <div class="relative mb-6">
+          <input id="searchInput" 
+            class="w-full pl-10 pr-4 py-3 bg-gray-800/50 text-white rounded-lg border border-gray-700/50 focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-colors" 
+            placeholder="Rechercher par pseudo ou preuve..." />
+          <svg class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </div>
+
+        <div id="fachoList" class="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar"></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/main.js"></script>
+</body>
+</html>

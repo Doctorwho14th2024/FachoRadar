@@ -37,7 +37,7 @@ npm run init-db
 ## 🛠️ Démarrage
 
 1. Démarrer le serveur de développement :
-\`\`\`bash
+\`\`\`
 npm run start
 \`\`\`
 

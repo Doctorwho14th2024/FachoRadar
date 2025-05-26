@@ -20,7 +20,7 @@ FachoRadar est une application web moderne conçue pour surveiller et suivre le 
 
 ## 🚀 Installation
 
-\`\`\`bash
+
 # Cloner le repository
 https://github.com/Doctorwho14th2024/FachoRadar
 

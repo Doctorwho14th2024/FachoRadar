@@ -22,7 +22,7 @@ FachoRadar est une application web moderne conçue pour surveiller et suivre le 
 
 
 # Cloner le repository
-https://github.com/Doctorwho14th2024/FachoRadar
+git clone https://github.com/Doctorwho14th2024/FachoRadar
 
 # Installer les dépendances
 cd FachoRadar

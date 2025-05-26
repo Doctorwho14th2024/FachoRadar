@@ -22,7 +22,7 @@ FachoRadar est une application web moderne conçue pour surveiller et suivre le 
 
 \`\`\`bash
 # Cloner le repository
-git clone https://github.com/votre-username/FachoRadar.git
+https://github.com/Doctorwho14th2024/FachoRadar
 
 # Installer les dépendances
 cd FachoRadar

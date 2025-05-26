@@ -17,7 +17,6 @@ FachoRadar est une application web moderne conçue pour surveiller et suivre le 
 - 🔍 Recherche et suivi des comptes
 - 📊 Analyse en temps réel
 - 💾 Stockage local avec SQLite
-- 🔄 Synchronisation avec Supabase
 - 🎨 Interface utilisateur moderne avec TailwindCSS
 
 ## 🚀 Installation

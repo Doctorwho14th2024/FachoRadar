@@ -1,6 +1,15 @@
 import './style.css'
 
-const API_URL = 'http://localhost:3000/api'
+const API_URL = process.env.NODE_ENV === 'production' 
+  ? 'https://localhost:8443/api'
+  : 'http://localhost:3000/api';
+const API_KEY = '483ed852097d86177b4d4722e322ae4f7063429fcb2c45bd64d6b98713cecb02';
+
+// Headers pour les requêtes
+const headers = {
+  'Content-Type': 'application/json',
+  'x-api-key': API_KEY
+};
 
 // Gestion de l'état de la connexion
 const connectionStatus = document.getElementById('connectionStatus')
@@ -11,12 +20,12 @@ function updateConnectionStatus(status) {
   switch (status) {
     case 'connecting':
       dot.className = 'inline-block w-2 h-2 rounded-full bg-yellow-500'
-      text.textContent = 'Connexion...'
+      text.textContent = 'Connexion à Fachopol...'
       text.className = 'text-gray-400'
       break
     case 'connected':
       dot.className = 'inline-block w-2 h-2 rounded-full bg-green-500'
-      text.textContent = 'Connecté'
+      text.textContent = 'Connecté à Fachopol'
       text.className = 'text-gray-400'
       setTimeout(() => {
         connectionStatus.style.opacity = '0'
@@ -25,7 +34,7 @@ function updateConnectionStatus(status) {
       break
     case 'error':
       dot.className = 'inline-block w-2 h-2 rounded-full bg-red-500'
-      text.textContent = 'Déconnecté'
+      text.textContent = 'Déconnecté de Fachopol'
       text.className = 'text-red-400'
       connectionStatus.style.display = 'flex'
       connectionStatus.style.opacity = '1'
@@ -39,7 +48,7 @@ async function testConnection(retries = 3) {
   for (let i = 0; i < retries; i++) {
     try {
       console.log(`Tentative de connexion ${i + 1}/${retries}...`)
-      const response = await fetch(`${API_URL}/fachos`)
+      const response = await fetch(`${API_URL}/fachos`, { headers })
       if (!response.ok) throw new Error('Erreur serveur')
       console.log('✅ Connexion au serveur réussie')
       updateConnectionStatus('connected')
@@ -107,7 +116,7 @@ function renderList(filter = '') {
 async function loadFachos(newItemId = null) {
   try {
     console.log('Tentative de chargement des données...')
-    const response = await fetch(`${API_URL}/fachos`)
+    const response = await fetch(`${API_URL}/fachos`, { headers })
     
     if (!response.ok) {
       console.error('Réponse serveur non-ok:', {
@@ -143,9 +152,26 @@ async function loadFachos(newItemId = null) {
 form.addEventListener('submit', async (e) => {
   e.preventDefault()
 
+  // Validation côté client
   const pseudo = form.pseudo.value.trim()
   const lien = form.lien.value.trim()
   const preuve = form.preuve.value.trim()
+
+  // Validation basique
+  if (pseudo.length < 3) {
+    showError('Le pseudo doit contenir au moins 3 caractères')
+    return
+  }
+  
+  if (!isValidURL(lien)) {
+    showError('Le lien doit être une URL valide')
+    return
+  }
+  
+  if (preuve.length < 10) {
+    showError('La preuve doit contenir au moins 10 caractères')
+    return
+  }
 
   if (!pseudo || !lien || !preuve) {
     message.textContent = "Tous les champs sont requis."
@@ -157,9 +183,7 @@ form.addEventListener('submit', async (e) => {
   try {
     const response = await fetch(`${API_URL}/fachos`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
       body: JSON.stringify({ pseudo, lien, preuve })
     })
 
@@ -185,5 +209,25 @@ form.addEventListener('submit', async (e) => {
 searchInput.addEventListener('input', () => {
   renderList(searchInput.value)
 })
+
+// Fonctions utilitaires
+function isValidURL(string) {
+  try {
+    new URL(string)
+    return true
+  } catch (_) {
+    return false
+  }
+}
+
+function showError(message) {
+  const messageEl = document.getElementById('message')
+  messageEl.textContent = message
+  messageEl.classList.remove('text-green-400')
+  messageEl.classList.add('text-red-400')
+  setTimeout(() => {
+    messageEl.textContent = ''
+  }, 5000)
+}
 
 loadFachos()

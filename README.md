@@ -31,31 +31,19 @@ FachoRadar est une application web moderne conçue pour surveiller et suivre le 
 - 🔍 Recherche et suivi des comptes
 - 📊 Analyse en temps réel
 - 💾 Stockage local avec SQLite
->>>>>>> b060efae849f1af87e3f653d57bead3f60de9163
 - 🎨 Interface utilisateur moderne avec TailwindCSS
 
 ## 🚀 Installation
-
-<<<<<<< HEAD
-```bash
-# Cloner le repository
-git clone https://github.com/votre-username/Fachopol.git
-
-# Installer les dépendances
-cd Fachopol
-=======
 
 # Cloner le repository
 git clone https://github.com/Doctorwho14th2024/FachoRadar
 
 # Installer les dépendances
 cd FachoRadar
->>>>>>> b060efae849f1af87e3f653d57bead3f60de9163
 npm install
 
 # Initialiser la base de données
 npm run init-db
-<<<<<<< HEAD
 ```
 =======
 \`\`\`
@@ -87,7 +75,6 @@ npm run start
 
 ## 📝 Scripts disponibles
 
-<<<<<<< HEAD
 - `npm run dev`: Lance le serveur de développement Vite
 - `npm run build`: Compile le projet pour la production
 - `npm run preview`: Prévisualise la version de production

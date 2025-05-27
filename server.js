@@ -170,37 +170,39 @@ app.post('/api/fachos', authenticateApiKey, [
 
 const PORT = process.env.PORT || 3000;
 const HTTPS_PORT = process.env.HTTPS_PORT || 443;
+const isProduction = process.env.NODE_ENV === 'production';
+const forceSSL = process.env.FORCE_SSL === 'true';
 
-// Créer le serveur HTTP qui ne fait que rediriger vers HTTPS en production
-if (process.env.NODE_ENV === 'production') {
-  http.createServer((req, res) => {
-    const host = req.headers['host'] ? req.headers['host'].replace(/:\d+$/, ':' + HTTPS_PORT) : '';
-    res.writeHead(301, { Location: `https://${host}${req.url}` });
-    res.end();
-  }).listen(PORT, () => {
-    console.log(`Redirection HTTP -> HTTPS en place sur http://localhost:${PORT}`);
-  });
-} else {
-  // En dev, le serveur HTTP sert l'app normalement
-  http.createServer(app).listen(PORT, () => {
-    console.log(`Serveur HTTP (dev) sur http://localhost:${PORT}`);
-  });
-}
-
-// Configuration HTTPS pour la production
+// Configuration HTTPS
 const httpsOptions = configureHttps();
-if (httpsOptions && process.env.NODE_ENV === 'production') {
-  const httpsServer = https.createServer(httpsOptions, app);
-  httpsServer.listen(HTTPS_PORT, () => {
-    console.log(`Serveur HTTPS démarré sur https://localhost:${HTTPS_PORT}`);
-  });
-  
-  // Rediriger HTTP vers HTTPS en production
-  app.use((req, res, next) => {
-    if (!req.secure) {
-      return res.redirect(`https://${req.headers.host}${req.url}`);
-    }
-    next();
+
+if (isProduction) {
+  if (forceSSL && httpsOptions) {
+    // Mode HTTPS forcé (auto-hébergement avec certificats)
+    const httpsServer = https.createServer(httpsOptions, app);
+    httpsServer.listen(HTTPS_PORT, () => {
+      console.log(`Serveur HTTPS démarré sur le port ${HTTPS_PORT}`);
+    });
+
+    // Redirection HTTP vers HTTPS
+    http.createServer((req, res) => {
+      res.writeHead(301, { 
+        Location: `https://${req.headers.host.replace(/:\d+/, ':' + HTTPS_PORT)}${req.url}` 
+      });
+      res.end();
+    }).listen(PORT, () => {
+      console.log(`Redirection HTTP -> HTTPS en place sur le port ${PORT}`);
+    });
+  } else {
+    // Mode HTTP (Railway.app gère SSL)
+    http.createServer(app).listen(PORT, () => {
+      console.log(`Serveur HTTP démarré sur le port ${PORT}`);
+    });
+  }
+} else {
+  // Mode développement
+  http.createServer(app).listen(PORT, () => {
+    console.log(`Serveur de développement démarré sur http://localhost:${PORT}`);
   });
 }
 

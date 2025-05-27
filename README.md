@@ -1,5 +1,5 @@
-
 # 🎯 Fachopol
+
 <div align="center">
   <img src="public/img/favicon.svg" alt="FachoRadar Logo" width="120" height="120" />
 </div>
@@ -62,6 +62,73 @@ npm run start
 - \`npm run server\`: Démarre le serveur Express
 - \`npm run start\`: Lance le serveur et le client en parallèle
 - \`npm run init-db\`: Initialise la base de données
+
+## 🚀 Déploiement
+
+### Prérequis
+- Node.js 18+ installé
+- Pour l'auto-hébergement : Un serveur Linux avec accès root
+- Pour Railway.app : Un compte Railway
+
+### Option 1 : Déploiement sur Railway.app
+
+1. Installer le CLI Railway :
+```bash
+npm i -g @railway/cli
+```
+
+2. Se connecter à Railway :
+```bash
+railway login
+```
+
+3. Initialiser le déploiement :
+```bash
+npm run deploy:init
+```
+
+4. Déployer sur Railway :
+```bash
+npm run deploy:railway
+```
+
+### Option 2 : Auto-hébergement avec SSL
+
+1. Préparation du serveur :
+```bash
+# Installer les dépendances nécessaires
+sudo apt-get update
+sudo apt-get install -y nodejs npm certbot
+```
+
+2. Cloner et configurer le projet :
+```bash
+git clone https://github.com/votre-nom/FachTOK.git
+cd FachTOK
+npm install
+npm run deploy:init
+```
+
+3. Configurer SSL avec Let's Encrypt :
+```bash
+npm run deploy:setup-ssl
+```
+
+4. Démarrer le serveur :
+```bash
+npm run start:prod
+```
+
+### Variables d'environnement
+
+- `PORT` : Port HTTP (défaut: 3000)
+- `HTTPS_PORT` : Port HTTPS (défaut: 443)
+- `FORCE_SSL` : Forcer HTTPS (true/false)
+- `CORS_ORIGIN` : Origine autorisée pour CORS
+- `JWT_SECRET` : Clé secrète pour JWT
+- `API_KEY` : Clé API
+- `DB_PATH` : Chemin de la base de données
+>>>>>>> 87edc69 (Configuration initiale pour Railway)
 
 ## 📄 Licence
 

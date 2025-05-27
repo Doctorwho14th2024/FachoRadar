@@ -1,61 +1,122 @@
-# 🎯 Fachopol
+
+# 🎯 Fachopol - La Vigie Antifasciste
 
 <div align="center">
-  <img src="public/img/favicon.svg" alt="FachoRadar Logo" width="120" height="120" />
-</div>
+  <img src="p## 🛠 Stack Technique
 
+<table>
+<tr>
+  <th>Frontend</th>
+  <th>Backend</th>
+  <th>Infrastructure</th>
+</tr>
+<tr>
+<td>
 
-[![Vite](https://img.shields.io/badge/vite-%23646CFF.svg?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
-[![TailwindCSS](https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
-[![Express.js](https://img.shields.io/badge/express.js-%23404d59.svg?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
-[![SQLite](https://img.shields.io/badge/sqlite-%2307405e.svg?style=for-the-badge&logo=sqlite&logoColor=white)](https://www.sqlite.org/)
-[![Node.js](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
-[![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)](https://developer.mozilla.org/fr/docs/Web/JavaScript)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
+- ⚡️ Vite.js
+- 🎨 TailwindCSS
+- 📱 Responsive Design
 
-🚩 Fachopol est une base de données collaborative listant les profils et contenus d’extrême droite sur les réseaux sociaux.
-🎯 Outil antifasciste pour répertorier, documenter, et combattre les idées fascistes.
-🔒 Libre, sécurisé, et militant.
+</td>
+<td>
 
+- 🚀 Express.js
+- 🗄 SQLite3
+- 🔑 JWT Auth
 
-## ✨ Fonctionnalités clés
+</td>
+<td>
 
-- 🔍 **Recherche facile** : Trouve rapidement les comptes identifiés d’extrême droite.  
-- 📋 **Listage collaboratif** : Une base à jour grâce à la contribution active de la communauté antifasciste.  
-- 💾 **Stockage local fiable** : Données sécurisées avec SQLite, sans dépendance externe.  
-- 🎨 **Design moderne** : Une interface claire, fluide et agréable grâce à TailwindCSS.
+- 🚂 Railway.app
+- 🔒 Let's Encrypt
+- 🚦 PM2
 
+</td>
+</tr>
+</table>
+
+## 📝 Commandes principales
+
+| Commande | Description |
+|----------|-------------|
+| `npm run dev` | Lance l'environnement de développement |
+| `npm run build` | Construit l'application pour la production |
+| `npm run start:prod` | Démarre le serveur en mode production |
+| `npm run deploy:railway` | Déploie sur Railway.app |on.svg" alt="Fachopol Logo" width="150" height="150" />
+  
+  <h3>📊 Base de données collaborative antifasciste</h3>
+  
+  <p><em>Identifier • Documenter • Combattre</em></p>
+
+  <br/>
+
+  [![Déployé sur Railway](https://img.shields.io/badge/🚂_Déployé_sur-Railway-131415?style=for-the-badge)](https://railway.app)
+  [![Discord](https://img.shields.io/badge/💬_Rejoins_le-Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/antifa)
+  
+  [![Made with Vite](https://img.shields.io/badge/⚡️_VITE-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
+  [![Styled with Tailwind](https://img.shields.io/badge/🎨_TAILWIND-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
+  [![Powered by Express](https://img.shields.io/badge/🛠_EXPRESS-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com)
+
+## 🎯 Mission
+
+> **Fachopol** est un outil militant développé pour la communauté antifasciste. Il permet d'identifier, documenter et combattre la présence de l'extrême-droite sur les réseaux sociaux.
+
+## ⚡️ Fonctionnalités Principales
+
+<table>
+<tr>
+  <td width="33%">
+    <h3>🔍 Tracking Intelligent</h3>
+    <ul>
+      <li>Identification automatique</li>
+      <li>Recherche avancée</li>
+      <li>Filtres multicritères</li>
+    </ul>
+  </td>
+  <td width="33%">
+    <h3>📊 Analytics</h3>
+    <ul>
+      <li>Visualisation des réseaux</li>
+      <li>Statistiques en temps réel</li>
+      <li>Tendances & patterns</li>
+    </ul>
+  </td>
+  <td width="33%">
+    <h3>🔐 Sécurité</h3>
+    <ul>
+      <li>Données chiffrées</li>
+      <li>Anonymisation</li>
+      <li>API sécurisée</li>
+    </ul>
+  </td>
+</tr>
+</table>
 
 ## 🚀 Installation
 
 
-# Cloner le repository
-git clone https://github.com/Doctorwho14th2024/FachoRadar
+## 🚀 Démarrage Rapide
 
-# Installer les dépendances
-cd FachoPOL
-npm install
+\`\`\`bash
+# 1️⃣ Cloner le projet
+git clone https://github.com/Doctorwho14th2024/Fachopol.git
 
-# Initialiser la base de données
-npm run init-db
+# 2️⃣ Installation
+cd Fachopol && npm install
+
+# 3️⃣ Démarrer l'application
+npm run dev
 \`\`\`
 
-## 🛠️ Démarrage
-
-1. Démarrer le serveur de développement :
-\`\`\`
-npm run start
-\`\`\`
-
-2. L'application sera accessible sur :
-   - Interface utilisateur : [http://localhost:5173](http://localhost:5173)
-   - API Backend : [http://localhost:3000](http://localhost:3000)
+L'application sera accessible sur :
+- 🌐 Interface Web : [http://localhost:5173](http://localhost:5173)
+- 🔧 API : [http://localhost:3000/api](http://localhost:3000/api)
 
 ## 🧰 Stack Technique
 
 - **Frontend**: Vite, TailwindCSS
 - **Backend**: Express.js
-- **Base de données**: SQLite
+- **Base de données**: SQLite, Supabase
 - **Outils**: Sharp (traitement d'images)
 
 ## 📝 Scripts disponibles
@@ -67,79 +128,83 @@ npm run start
 - \`npm run start\`: Lance le serveur et le client en parallèle
 - \`npm run init-db\`: Initialise la base de données
 
-## 🚀 Déploiement
+## 📦 Déploiement
 
-### Prérequis
-- Node.js 18+ installé
-- Pour l'auto-hébergement : Un serveur Linux avec accès root
-- Pour Railway.app : Un compte Railway
+<details>
+<summary>🚂 Sur Railway.app (Recommandé)</summary>
 
-### Option 1 : Déploiement sur Railway.app
-
-1. Installer le CLI Railway :
-```bash
+\`\`\`bash
+# Installation du CLI Railway
 npm i -g @railway/cli
-```
 
-2. Se connecter à Railway :
-```bash
+# Login
 railway login
-```
 
-3. Initialiser le déploiement :
-```bash
-npm run deploy:init
-```
-
-4. Déployer sur Railway :
-```bash
+# Déploiement
 npm run deploy:railway
-```
+\`\`\`
 
-### Option 2 : Auto-hébergement avec SSL
+</details>
 
-1. Préparation du serveur :
-```bash
-# Installer les dépendances nécessaires
-sudo apt-get update
-sudo apt-get install -y nodejs npm certbot
-```
+<details>
+<summary>🖥 Auto-hébergement</summary>
 
-2. Cloner et configurer le projet :
-```bash
-git clone https://github.com/votre-nom/FachTOK.git
-cd FachTOK
-npm install
-npm run deploy:init
-```
+\`\`\`bash
+# 1. Prérequis
+sudo apt update && sudo apt install -y nodejs npm certbot
 
-3. Configurer SSL avec Let's Encrypt :
-```bash
+# 2. Configuration SSL
 npm run deploy:setup-ssl
-```
 
-4. Démarrer le serveur :
-```bash
+# 3. Démarrage production
 npm run start:prod
-```
+\`\`\`
 
-### Variables d'environnement
+</details>
 
-- `PORT` : Port HTTP (défaut: 3000)
-- `HTTPS_PORT` : Port HTTPS (défaut: 443)
-- `FORCE_SSL` : Forcer HTTPS (true/false)
-- `CORS_ORIGIN` : Origine autorisée pour CORS
-- `JWT_SECRET` : Clé secrète pour JWT
-- `API_KEY` : Clé API
-- `DB_PATH` : Chemin de la base de données
->>>>>>> 87edc69 (Configuration initiale pour Railway)
+## 🔐 Variables d'Environnement
 
-## 📄 Licence
+| Variable | Description | Défaut |
+|----------|-------------|---------|
+| `PORT` | Port HTTP | 3000 |
+| `HTTPS_PORT` | Port HTTPS | 443 |
+| `API_KEY` | Clé API secrète | - |
+| `JWT_SECRET` | Secret JWT | - |
+| `DB_PATH` | Chemin BDD | ./data/database.db |
+| `CORS_ORIGIN` | Origine CORS | * |
 
-Ce projet est sous licence MIT.
+## 🛡 Sécurité
+
+- **Chiffrement** : AES-256 pour les données sensibles
+- **API** : Rate limiting et protection CORS
+- **Authentification** : JWT + API Key
+- **Anonymisation** : Aucune donnée personnelle stockée
+- **Logs** : Rotation automatique et chiffrement
 
 ## 🤝 Contribution
 
-Les contributions sont les bienvenues ! N'hésitez pas à ouvrir une issue ou soumettre une pull request.
+Les contributions sont essentielles ! La lutte antifasciste est collective :
+
+1. 🍴 Fork le projet
+2. 🌿 Crée une branche (`git checkout -b feature/AmazingFeature`)
+3. 🔧 Commit tes changements (`git commit -m 'Add: Amazing Feature'`)
+4. 📤 Push vers la branche (`git push origin feature/AmazingFeature`)
+5. 🔍 Ouvre une Pull Request
+
+## 📄 Licence
+
+Distribué sous licence MIT. Voir [`LICENSE`](LICENSE) pour plus d'informations.
+
+---
+
+<div align="center">
+
+### 🌟 La lutte antifasciste ne s'arrête jamais 🌟
+
+<sub>Made with ❤️ by the antifascist community</sub>
+<br/>
+<sub>Version 1.0.0 | © 2025</sub>
+
+</div>
 
 

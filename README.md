@@ -1,6 +1,6 @@
 
 # 🎯 Fachopol - La Vigie Antifasciste
-
+  <img src="public/img/favicon.svg" alt="Fachopol Logo" width="150" height="150" />
 <div align="center">
   <img src="p## 🛠 Stack Technique
 

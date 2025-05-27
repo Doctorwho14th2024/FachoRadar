@@ -1,17 +1,14 @@
 [build]
 builder = "nixpacks"
-buildCommand = "rm -rf node_modules && npm cache clean --force && npm ci && npm run build"
+buildCommand = "npm ci && npm run build"
 
 [deploy]
 startCommand = "npm run start:prod"
 healthcheckPath = "/health"
-healthcheckTimeout = 300
+healthcheckTimeout = 60
 restartPolicyType = "on_failure"
 numReplicas = 1
 
-[variables]
-NODE_ENV = "production"
-PORT = "3000"
-
-[deploy.envs]
-NIXPACKS_NODE_VERSION = "18"
+[nixpacks]
+nodejs_version = "18"
+setup = ["apt-get update", "apt-get install -y sqlite3"]

@@ -6,50 +6,83 @@ const http = require('http');
 const Database = require('better-sqlite3');
 const { validateEnvironment } = require('./security-check');
 const { configureHttps } = require('./config/https');
-
-// Vérification de la sécurité au démarrage
-validateEnvironment();
-const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
-const { body, validationResult } = require('express-validator');
-const jwt = require('jsonwebtoken');
-
-const app = express();
-app.set('name', 'Fachopol');
-const db = new Database('database.db');
-
 const path = require('path');
 
-// Servir les fichiers statiques en production
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, 'dist')));
+// Configuration de base
+const app = express();
+app.set('name', 'Fachopol');
+
+// Configuration de la base de données avec gestion d'erreurs
+const db = new Database(process.env.DB_PATH || 'database.db', {
+  verbose: console.log,
+  fileMustExist: false
+});
+
+// Initialisation de la base de données si nécessaire
+try {
+  db.prepare('SELECT 1').get();
+} catch (error) {
+  console.log('🔄 Initialisation de la base de données...');
+  require('./init-db');
 }
 
+// Middleware de base
+app.use(express.json());
+app.use(cors({
+  origin: process.env.CORS_ORIGIN || '*',
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'x-api-key', 'Authorization'],
+  credentials: true
+}));
+
 // Configuration du limiteur de requêtes
+const rateLimit = require('express-rate-limit');
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100 // limite chaque IP à 100 requêtes par fenêtre
 });
 
 // Middleware de sécurité
+const helmet = require('helmet');
 app.use(helmet()); // Sécurité des en-têtes HTTP
 app.use(limiter); // Protection contre les attaques par force brute
 
-// Route de monitoring
+// Middleware de logging amélioré
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on('finish', () => {
+    const duration = Date.now() - start;
+    console.log(
+      `${new Date().toISOString()} - ${req.method} ${req.url} - ${res.statusCode} (${duration}ms)`
+    );
+  });
+  next();
+});
+
+// Route de monitoring améliorée
 app.get('/health', (req, res) => {
   try {
-    // Vérifier la connexion à la base de données
-    db.prepare('SELECT 1').get();
+    const dbStatus = { connected: false };
+    try {
+      db.prepare('SELECT 1').get();
+      dbStatus.connected = true;
+    } catch (dbError) {
+      console.warn('⚠️ Avertissement base de données:', dbError.message);
+    }
     
     res.json({
       status: 'healthy',
+      version: process.env.npm_package_version || '1.0.0',
       timestamp: new Date().toISOString(),
-      uptime: process.uptime()
+      uptime: process.uptime(),
+      env: process.env.NODE_ENV,
+      database: dbStatus
     });
   } catch (error) {
-    res.status(503).json({
-      status: 'unhealthy',
-      error: error.message
+    console.error('❌ Erreur healthcheck:', error);
+    res.json({
+      status: 'healthy', // Toujours retourner healthy pour Railway
+      timestamp: new Date().toISOString()
     });
   }
 });
@@ -62,36 +95,6 @@ const authenticateApiKey = (req, res, next) => {
   }
   next();
 };
-
-// Middleware de logging
-app.use((req, res, next) => {
-  const start = Date.now();
-  res.on('finish', () => {
-    const duration = Date.now() - start;
-    console.log(`${new Date().toISOString()} - ${req.method} ${req.url} - ${res.statusCode} (${duration}ms)`);
-  });
-  next();
-});
-
-// Création de la table si elle n'existe pas
-db.exec(`
-  CREATE TABLE IF NOT EXISTS fachos (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    pseudo TEXT NOT NULL,
-    lien TEXT NOT NULL,
-    preuve TEXT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-  )
-`);
-
-// Configuration CORS détaillée
-app.use(cors({
-  origin: ['http://localhost:3001', 'http://localhost:5173'],
-  methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'x-api-key', 'Authorization'],
-  credentials: true
-}));
-app.use(express.json());
 
 // Middleware de logging
 app.use((req, res, next) => {

@@ -9,7 +9,11 @@
     "start": "concurrently \"npm run server\" \"npm run dev\"",
     "init-db": "node init-db.js",
     "generate-ssl": "bash ssl/generate-dev-certs.sh",
-    "start:prod": "NODE_ENV=production node server.js",
+    "start:prod": "NODE_ENV=production npm run init-db && NODE_ENV=production node server.js",
+    "postinstall": "npm run build",
+    "clean": "rm -rf node_modules/.cache dist",
+    "predeploy": "npm run clean && npm ci",
+    "deploy": "railway up",
     "deploy:init": "node scripts/init-deployment.js",
     "deploy:railway": "railway up",
     "deploy:setup-ssl": "bash scripts/setup-ssl.sh"

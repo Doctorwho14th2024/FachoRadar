@@ -1,6 +1,6 @@
 [build]
 builder = "nixpacks"
-buildCommand = "npm ci && npm run build"
+buildCommand = "rm -rf node_modules && npm cache clean --force && npm ci && npm run build"
 
 [deploy]
 startCommand = "npm run start:prod"
@@ -12,3 +12,6 @@ numReplicas = 1
 [variables]
 NODE_ENV = "production"
 PORT = "3000"
+
+[deploy.envs]
+NIXPACKS_NODE_VERSION = "18"

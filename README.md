@@ -13,14 +13,20 @@
 [![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)](https://developer.mozilla.org/fr/docs/Web/JavaScript)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
-Fachopol est une application web moderne conçue pour surveiller et tracker le contenu extrémiste de droite   sur les plateformes de médias sociaux afin d'actions antifasciste. 
+🚩 Fachopol est une base de données collaborative listant les profils et contenus d’extrême droite sur les réseaux sociaux.
+🎯 Outil antifasciste pour répertorier, documenter, et combattre les idées fascistes.
+🔒 Libre, sécurisé, et militant.
 
-## ✨ Fonctionnalités
 
-- 🔍 Recherche et track des comptes
-- 📊 Analyse en temps réel
-- 💾 Stockage local avec SQLite
-- 🎨 Interface utilisateur moderne avec TailwindCSS
+
+##✨ Fonctionnalités
+🔍 Recherche et suivi des comptes listés
+
+📋 Listage collaboratif des profils d’extrême droite
+
+💾 Stockage local via SQLite
+
+🎨 Interface moderne avec TailwindCSS
 
 ## 🚀 Installation
 

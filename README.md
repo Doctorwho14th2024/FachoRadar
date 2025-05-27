@@ -1,13 +1,10 @@
-<<<<<<< HEAD
+
 # 🎯 Fachopol
 
 <div align="center">
   <img src="public/img/favicon.svg" alt="Fachopol Logo" width="120" height="120" />
 =======
-<div align="center">
-  <img src="public/img/favicon.svg" alt="FachoRadar Logo" width="120" height="120" />
->>>>>>> b060efae849f1af87e3f653d57bead3f60de9163
-</div>
+
 
 [![Vite](https://img.shields.io/badge/vite-%23646CFF.svg?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
 [![TailwindCSS](https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
@@ -67,7 +64,7 @@ npm run init-db
 ```
 =======
 \`\`\`
->>>>>>> b060efae849f1af87e3f653d57bead3f60de9163
+
 
 ## 🛠️ Démarrage
 
@@ -80,7 +77,7 @@ npm run start
 \`\`\`
 npm run start
 \`\`\`
->>>>>>> b060efae849f1af87e3f653d57bead3f60de9163
+
 
 2. L'application sera accessible sur :
    - Interface utilisateur : [http://localhost:5173](http://localhost:5173)
@@ -109,7 +106,7 @@ npm run start
 - \`npm run server\`: Démarre le serveur Express
 - \`npm run start\`: Lance le serveur et le client en parallèle
 - \`npm run init-db\`: Initialise la base de données
->>>>>>> b060efae849f1af87e3f653d57bead3f60de9163
+
 
 ## 📄 Licence
 

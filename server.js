@@ -7,23 +7,43 @@ const Database = require('better-sqlite3');
 const { validateEnvironment } = require('./security-check');
 const { configureHttps } = require('./config/https');
 const path = require('path');
+const fs = require('fs');
 
 // Configuration de base
 const app = express();
 app.set('name', 'Fachopol');
 
 // Configuration de la base de données avec gestion d'erreurs
-const db = new Database(process.env.DB_PATH || 'database.db', {
-  verbose: console.log,
-  fileMustExist: false
-});
-
-// Initialisation de la base de données si nécessaire
+let db;
 try {
-  db.prepare('SELECT 1').get();
+  const dbPath = process.env.DB_PATH || './database.db';
+  const dbDir = path.dirname(dbPath);
+  
+  // Créer le dossier de la base de données s'il n'existe pas
+  if (!fs.existsSync(dbDir)) {
+    fs.mkdirSync(dbDir, { recursive: true });
+  }
+  
+  db = new Database(dbPath, {
+    verbose: console.log,
+    fileMustExist: false
+  });
+  
+  // Initialiser la base de données si nécessaire
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS fachos (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      pseudo TEXT NOT NULL,
+      lien TEXT NOT NULL,
+      preuve TEXT NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
+  
+  console.log('✅ Base de données configurée avec succès');
 } catch (error) {
-  console.log('🔄 Initialisation de la base de données...');
-  require('./init-db');
+  console.error('❌ Erreur de configuration de la base de données:', error);
+  process.exit(1);
 }
 
 // Middleware de base

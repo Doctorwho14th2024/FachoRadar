@@ -1,14 +1,14 @@
 [build]
 builder = "nixpacks"
-buildCommand = "npm ci && npm run build"
+buildCommand = "npm install && npm run build"
 
 [deploy]
-startCommand = "npm run start:prod"
-healthcheckPath = "/health"
-healthcheckTimeout = 60
+startCommand = "NODE_ENV=production node server.js"
 restartPolicyType = "on_failure"
-numReplicas = 1
 
 [nixpacks]
 nodejs_version = "18"
-setup = ["apt-get update", "apt-get install -y sqlite3"]
+
+[[build.env]]
+key = "NODE_ENV"
+value = "production"

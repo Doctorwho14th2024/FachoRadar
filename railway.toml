@@ -1,14 +1,12 @@
 [build]
 builder = "nixpacks"
-buildCommand = "npm install && npm run build"
+watch = false
 
 [deploy]
-startCommand = "NODE_ENV=production node server.js"
+startCommand = "node server.js"
+healthcheckPath = "/health"
 restartPolicyType = "on_failure"
+numReplicas = 1
 
 [nixpacks]
 nodejs_version = "18"
-
-[[build.env]]
-key = "NODE_ENV"
-value = "production"

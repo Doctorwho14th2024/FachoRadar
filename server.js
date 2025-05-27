@@ -1,50 +1,39 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const https = require('https');
 const http = require('http');
 const Database = require('better-sqlite3');
-const { validateEnvironment } = require('./security-check');
-const { configureHttps } = require('./config/https');
 const path = require('path');
 const fs = require('fs');
 
 // Configuration de base
 const app = express();
 app.set('name', 'Fachopol');
+const PORT = process.env.PORT || 3000;
 
-// Configuration de la base de données avec gestion d'erreurs
-let db;
-try {
-  const dbPath = process.env.DB_PATH || './database.db';
-  const dbDir = path.dirname(dbPath);
-  
-  // Créer le dossier de la base de données s'il n'existe pas
-  if (!fs.existsSync(dbDir)) {
-    fs.mkdirSync(dbDir, { recursive: true });
-  }
-  
-  db = new Database(dbPath, {
-    verbose: console.log,
-    fileMustExist: false
-  });
-  
-  // Initialiser la base de données si nécessaire
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS fachos (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      pseudo TEXT NOT NULL,
-      lien TEXT NOT NULL,
-      preuve TEXT NOT NULL,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
-  `);
-  
-  console.log('✅ Base de données configurée avec succès');
-} catch (error) {
-  console.error('❌ Erreur de configuration de la base de données:', error);
-  process.exit(1);
+// Configuration de la base de données
+const DB_DIR = path.join(__dirname, 'data');
+const DB_PATH = path.join(DB_DIR, 'database.db');
+
+// Créer le dossier data s'il n'existe pas
+if (!fs.existsSync(DB_DIR)) {
+  fs.mkdirSync(DB_DIR, { recursive: true });
 }
+
+// Initialiser la base de données
+const db = new Database(DB_PATH, { verbose: console.log });
+db.pragma('journal_mode = WAL');
+
+// Créer la table si elle n'existe pas
+db.exec(`
+  CREATE TABLE IF NOT EXISTS fachos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    pseudo TEXT NOT NULL,
+    lien TEXT NOT NULL,
+    preuve TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  );
+`);
 
 // Middleware de base
 app.use(express.json());
@@ -55,17 +44,19 @@ app.use(cors({
   credentials: true
 }));
 
-// Configuration du limiteur de requêtes
-const rateLimit = require('express-rate-limit');
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100 // limite chaque IP à 100 requêtes par fenêtre
-});
+// Servir les fichiers statiques en production
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, 'dist')));
+}
 
 // Middleware de sécurité
 const helmet = require('helmet');
-app.use(helmet()); // Sécurité des en-têtes HTTP
-app.use(limiter); // Protection contre les attaques par force brute
+const rateLimit = require('express-rate-limit');
+app.use(helmet());
+app.use(rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100
+}));
 
 // Middleware de logging amélioré
 app.use((req, res, next) => {
@@ -191,47 +182,13 @@ app.post('/api/fachos', authenticateApiKey, [
   }
 });
 
-const PORT = process.env.PORT || 3000;
-const HTTPS_PORT = process.env.HTTPS_PORT || 443;
-const isProduction = process.env.NODE_ENV === 'production';
-const forceSSL = process.env.FORCE_SSL === 'true';
-
-// Configuration HTTPS
-const httpsOptions = configureHttps();
-
-if (isProduction) {
-  if (forceSSL && httpsOptions) {
-    // Mode HTTPS forcé (auto-hébergement avec certificats)
-    const httpsServer = https.createServer(httpsOptions, app);
-    httpsServer.listen(HTTPS_PORT, () => {
-      console.log(`Serveur HTTPS démarré sur le port ${HTTPS_PORT}`);
-    });
-
-    // Redirection HTTP vers HTTPS
-    http.createServer((req, res) => {
-      res.writeHead(301, { 
-        Location: `https://${req.headers.host.replace(/:\d+/, ':' + HTTPS_PORT)}${req.url}` 
-      });
-      res.end();
-    }).listen(PORT, () => {
-      console.log(`Redirection HTTP -> HTTPS en place sur le port ${PORT}`);
-    });
-  } else {
-    // Mode HTTP (Railway.app gère SSL)
-    http.createServer(app).listen(PORT, () => {
-      console.log(`Serveur HTTP démarré sur le port ${PORT}`);
-    });
-  }
-} else {
-  // Mode développement
-  http.createServer(app).listen(PORT, () => {
-    console.log(`Serveur de développement démarré sur http://localhost:${PORT}`);
-  });
-}
-
 // Placer la route catch-all tout à la fin, après toutes les autres routes
 if (process.env.NODE_ENV === 'production') {
   app.get(/.*/, (req, res) => {
     res.sendFile(path.join(__dirname, 'dist', 'index.html'));
   });
 }
+
+http.createServer(app).listen(PORT, () => {
+  console.log(`Serveur démarré sur le port ${PORT}`);
+});

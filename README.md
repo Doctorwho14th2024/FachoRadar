@@ -1,10 +1,5 @@
 
 # 🎯 Fachopol - La Vigie Antifasciste
-<body class="flex items-center justify-center min-h-screen bg-white">
-  <img src="public/img/favicon.svg" alt="favicon" class="w-12 h-12 object-contain" />
-</body>
-
-
 
 <div align="center">
   <img src="p## 🛠 Stack Technique

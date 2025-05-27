@@ -1,7 +1,9 @@
 
 # 🎯 Fachopol
+<div align="center">
   <img src="public/img/favicon.svg" alt="FachoRadar Logo" width="120" height="120" />
 </div>
+
 
 [![Vite](https://img.shields.io/badge/vite-%23646CFF.svg?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
 [![TailwindCSS](https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)

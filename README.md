@@ -18,15 +18,13 @@
 🔒 Libre, sécurisé, et militant.
 
 
+## ✨ Fonctionnalités clés
 
-##✨ Fonctionnalités
-🔍 Recherche et suivi des comptes listés
+- 🔍 **Recherche facile** : Trouve rapidement les comptes identifiés d’extrême droite.  
+- 📋 **Listage collaboratif** : Une base à jour grâce à la contribution active de la communauté antifasciste.  
+- 💾 **Stockage local fiable** : Données sécurisées avec SQLite, sans dépendance externe.  
+- 🎨 **Design moderne** : Une interface claire, fluide et agréable grâce à TailwindCSS.
 
-📋 Listage collaboratif des profils d’extrême droite
-
-💾 Stockage local via SQLite
-
-🎨 Interface moderne avec TailwindCSS
 
 ## 🚀 Installation
 

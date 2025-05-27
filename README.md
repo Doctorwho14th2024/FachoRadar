@@ -1,9 +1,8 @@
 
 # 🎯 Fachopol
-
-<div align="center">
-  <img src="public/img/favicon.svg" alt="Fachopol Logo" width="120" height="120" />
-
+div align="center">
+  <img src="public/img/favicon.svg" alt="FachoRadar Logo" width="120" height="120" />
+</div>
 
 [![Vite](https://img.shields.io/badge/vite-%23646CFF.svg?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
 [![TailwindCSS](https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
@@ -13,17 +12,6 @@
 [![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)](https://developer.mozilla.org/fr/docs/Web/JavaScript)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
-
-Fachopol est une application web permettant de constituer une liste de comptes fascistes (fachos) présents sur les réseaux sociaux. L'objectif est d'identifier ces comptes, de savoir qui ils sont et de permettre l'organisation d'actions antifascistes (antifa) coordonnées contre eux.
-
-## ✨ Fonctionnalités
-
-- 📝 Constitution collaborative d'une liste de comptes fachos
-- 🔗 Centralisation des liens de profils
-- 📢 Outils pour organiser des actions antifa sur les réseaux
-- 💾 Stockage local avec SQLite
-- 🔄 Synchronisation possible avec Supabase
-=======
 FachoRadar est une application web moderne conçue pour surveiller et suivre le contenu extrémiste de droite  sur les plateformes de médias sociaux. Elle offre des fonctionnalités avancées de suivi en temps réel et d'analyse de données.
 
 ## ✨ Fonctionnalités
@@ -35,6 +23,7 @@ FachoRadar est une application web moderne conçue pour surveiller et suivre le 
 
 ## 🚀 Installation
 
+
 # Cloner le repository
 git clone https://github.com/Doctorwho14th2024/FachoRadar
 
@@ -44,23 +33,14 @@ npm install
 
 # Initialiser la base de données
 npm run init-db
-```
-=======
 \`\`\`
-
 
 ## 🛠️ Démarrage
 
 1. Démarrer le serveur de développement :
-<<<<<<< HEAD
-```bash
-npm run start
-```
-=======
 \`\`\`
 npm run start
 \`\`\`
-
 
 2. L'application sera accessible sur :
    - Interface utilisateur : [http://localhost:5173](http://localhost:5173)
@@ -75,20 +55,12 @@ npm run start
 
 ## 📝 Scripts disponibles
 
-- `npm run dev`: Lance le serveur de développement Vite
-- `npm run build`: Compile le projet pour la production
-- `npm run preview`: Prévisualise la version de production
-- `npm run server`: Démarre le serveur Express
-- `npm run start`: Lance le serveur et le client en parallèle
-- `npm run init-db`: Initialise la base de données
-=======
 - \`npm run dev\`: Lance le serveur de développement Vite
 - \`npm run build\`: Compile le projet pour la production
 - \`npm run preview\`: Prévisualise la version de production
 - \`npm run server\`: Démarre le serveur Express
 - \`npm run start\`: Lance le serveur et le client en parallèle
 - \`npm run init-db\`: Initialise la base de données
-
 
 ## 📄 Licence
 
@@ -97,3 +69,5 @@ Ce projet est sous licence MIT.
 ## 🤝 Contribution
 
 Les contributions sont les bienvenues ! N'hésitez pas à ouvrir une issue ou soumettre une pull request.
+
+

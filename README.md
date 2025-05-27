@@ -13,11 +13,11 @@
 [![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)](https://developer.mozilla.org/fr/docs/Web/JavaScript)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
-FachoRadar est une application web moderne conçue pour surveiller et tracker le contenu extrémiste de droite   sur les plateformes de médias sociaux afin d'actions antifasciste. Elle offre des fonctionnalités avancées de suivi en temps réel et d'analyse de données.
+Fachopol est une application web moderne conçue pour surveiller et tracker le contenu extrémiste de droite   sur les plateformes de médias sociaux afin d'actions antifasciste. Elle offre des fonctionnalités avancées de suivi en temps réel et d'analyse de données.
 
 ## ✨ Fonctionnalités
 
-- 🔍 Recherche et suivi des comptes
+- 🔍 Recherche et track des comptes
 - 📊 Analyse en temps réel
 - 💾 Stockage local avec SQLite
 - 🎨 Interface utilisateur moderne avec TailwindCSS

@@ -1,6 +1,5 @@
 
 # 🎯 Fachopol
-div align="center">
   <img src="public/img/favicon.svg" alt="FachoRadar Logo" width="120" height="120" />
 </div>
 

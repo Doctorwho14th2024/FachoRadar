@@ -27,7 +27,7 @@ FachoRadar est une application web moderne conçue pour surveiller et suivre le 
 git clone https://github.com/Doctorwho14th2024/FachoRadar
 
 # Installer les dépendances
-cd FachoRadar
+cd FachoPOL
 npm install
 
 # Initialiser la base de données

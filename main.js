@@ -74,6 +74,7 @@ const proofVideoCurrent = document.getElementById('proofVideoCurrent')
 
 let fachos = []
 let editingId = null
+let activeMobileTab = 'list'
 const VIDEO_UPLOAD_MAX_MB = 5120
 const VIDEO_UPLOAD_MAX_BYTES = VIDEO_UPLOAD_MAX_MB * 1024 * 1024
 const allowedVideoTypes = new Set(['video/mp4', 'video/webm', 'video/quicktime', 'video/x-m4v'])
@@ -241,11 +242,19 @@ function updateConnectionStatus(status) {
 function switchTab(tab) {
   const isDesktop = window.innerWidth >= 1024
   if (isDesktop || !panelList || !panelForm || !tabList || !tabForm) return
+  activeMobileTab = tab
   const activeElement = document.activeElement
   if (activeElement && typeof activeElement.blur === 'function') {
     activeElement.blur()
   }
 
+  applyMobileTab()
+}
+
+function applyMobileTab() {
+  if (!panelList || !panelForm || !tabList || !tabForm) return
+
+  const tab = activeMobileTab
   if (tab === 'list') {
     panelList.classList.remove('hidden')
     panelForm.classList.add('hidden')
@@ -271,8 +280,7 @@ function initLayout() {
     panelList.classList.remove('hidden')
     panelForm.classList.remove('hidden')
   } else {
-    panelList.classList.remove('hidden')
-    panelForm.classList.add('hidden')
+    applyMobileTab()
   }
 }
 
@@ -598,6 +606,9 @@ form.addEventListener('submit', async (e) => {
     message.classList.add('text-green-400')
     setFormMode('create')
     await loadFachos(savedFacho.id) // Passer l'ID pour le mettre en évidence
+    if (window.innerWidth < 1024) {
+      switchTab('list')
+    }
   } catch (error) {
     console.error('Erreur:', error)
     message.textContent = error.status === 409 ? `Déjà présent: ${error.message}` : error.message
@@ -669,12 +680,6 @@ tabList?.addEventListener('click', () => switchTab('list'))
 tabForm?.addEventListener('click', () => switchTab('form'))
 window.addEventListener('resize', initLayout)
 initLayout()
-
-form?.addEventListener('submit', () => {
-  if (window.innerWidth < 1024) {
-    setTimeout(() => switchTab('list'), 1500)
-  }
-})
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {

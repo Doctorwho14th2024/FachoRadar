@@ -51,6 +51,23 @@ random_secret() {
   fi
 }
 
+env_value() {
+  local env_file="$1"
+  local key="$2"
+
+  if [ ! -f "$env_file" ]; then
+    return 0
+  fi
+
+  awk -F= -v key="$key" '
+    $1 == key {
+      sub(/^[^=]*=/, "")
+      print
+      exit
+    }
+  ' "$env_file"
+}
+
 ask() {
   local var_name="$1"
   local prompt="$2"
@@ -162,6 +179,13 @@ main() {
   write_env
   write_compose
 
+  env_file="$APP_DIR/.env"
+  DISPLAY_APP_PASSWORD="${APP_PASSWORD:-$(env_value "$env_file" APP_PASSWORD)}"
+  DISPLAY_PORT="$(env_value "$env_file" PORT)"
+  DISPLAY_PUBLIC_URL="$(env_value "$env_file" PUBLIC_URL)"
+  DISPLAY_PORT="${DISPLAY_PORT:-$PORT}"
+  DISPLAY_PUBLIC_URL="${DISPLAY_PUBLIC_URL:-$PUBLIC_URL}"
+
   info "Configuration creee dans: $APP_DIR"
   info "Image Docker: $IMAGE"
 
@@ -174,11 +198,15 @@ main() {
   fi
 
   printf '\n'
-  printf 'URL locale: http://localhost:%s\n' "$PORT"
-  if [ -n "$PUBLIC_URL" ]; then
-    printf 'URL publique: %s\n' "$PUBLIC_URL"
+  printf 'URL locale: http://localhost:%s\n' "$DISPLAY_PORT"
+  if [ -n "$DISPLAY_PUBLIC_URL" ]; then
+    printf 'URL publique: %s\n' "$DISPLAY_PUBLIC_URL"
   fi
-  printf 'Mot de passe app: %s\n' "$APP_PASSWORD"
+  if [ -n "$DISPLAY_APP_PASSWORD" ]; then
+    printf 'Mot de passe app: %s\n' "$DISPLAY_APP_PASSWORD"
+  else
+    printf 'Mot de passe app: deja configure dans %s/.env\n' "$APP_DIR"
+  fi
   printf '\n'
   printf 'Commandes utiles:\n'
   printf '  cd %s\n' "$APP_DIR"

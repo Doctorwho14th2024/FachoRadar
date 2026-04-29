@@ -141,6 +141,10 @@ function updateConnectionStatus(status) {
 function switchTab(tab) {
   const isDesktop = window.innerWidth >= 1024
   if (isDesktop || !panelList || !panelForm || !tabList || !tabForm) return
+  const activeElement = document.activeElement
+  if (activeElement && typeof activeElement.blur === 'function') {
+    activeElement.blur()
+  }
 
   if (tab === 'list') {
     panelList.classList.remove('hidden')
@@ -156,7 +160,6 @@ function switchTab(tab) {
     tabForm.classList.remove('text-gray-500')
     tabList.classList.remove('active', 'text-red-400')
     tabList.classList.add('text-gray-500')
-    setTimeout(() => document.getElementById('inputPseudo')?.focus(), 100)
   }
 }
 

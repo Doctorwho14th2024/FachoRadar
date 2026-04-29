@@ -14,6 +14,7 @@ Uncon#13
 *.pub
 
 # Base de données
+data/
 *.db
 *.sqlite
 *.sqlite3
@@ -41,3 +42,8 @@ npm-debug.log*
 # Editor
 .vscode/
 .idea/
+
+# Outils locaux
+.codex
+.codex/
+fachoradar-deploy/

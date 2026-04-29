@@ -1,0 +1,35 @@
+# Dépendances
+node_modules/
+npm-debug.log*
+
+# Cache build
+dist/
+.vite/
+
+# Environnement local
+.env
+.env.local
+*.env
+
+# Base de données locale
+data/
+*.db
+*.db-wal
+*.db-shm
+
+# Certificats SSL locaux
+ssl/
+
+# Fichiers de dev
+.github/
+*.md
+Makefile
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp

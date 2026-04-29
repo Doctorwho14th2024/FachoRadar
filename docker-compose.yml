@@ -1,0 +1,71 @@
+services:
+
+  fachopol:
+    image: liberchat/fachoradar:latest
+    container_name: fachopol
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - CORS_ORIGIN=${CORS_ORIGIN:-*}
+      - DB_PATH=/app/data/database.db
+      - APP_PASSWORD=${APP_PASSWORD:?Definis APP_PASSWORD dans .env}
+      - SESSION_SECRET=${SESSION_SECRET:?Definis SESSION_SECRET dans .env}
+      - TRUST_PROXY=${TRUST_PROXY:-1}
+      - PUBLIC_URL=${PUBLIC_URL:-}
+      - COOKIE_DOMAIN=${COOKIE_DOMAIN:-}
+      - COOKIE_SECURE=${COOKIE_SECURE:-auto}
+      - COOKIE_SAMESITE=${COOKIE_SAMESITE:-Lax}
+    volumes:
+      # Persistance de la base de données SQLite
+      - fachopol_data:/app/data
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    networks:
+      - fachopol_net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.fachopol.rule=Host(`${DOMAIN:-localhost}`)"
+      - "traefik.http.routers.fachopol.entrypoints=websecure"
+      - "traefik.http.routers.fachopol.tls.certresolver=letsencrypt"
+      - "traefik.http.services.fachopol.loadbalancer.server.port=3000"
+
+  # Reverse proxy optionnel (décommentez pour activer Traefik + HTTPS automatique)
+  # traefik:
+  #   image: traefik:v3.0
+  #   container_name: traefik
+  #   restart: unless-stopped
+  #   command:
+  #     - "--api.insecure=false"
+  #     - "--providers.docker=true"
+  #     - "--providers.docker.exposedbydefault=false"
+  #     - "--entrypoints.web.address=:80"
+  #     - "--entrypoints.websecure.address=:443"
+  #     - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+  #     - "--certificatesresolvers.letsencrypt.acme.tlschallenge=true"
+  #     - "--certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL}"
+  #     - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock:ro
+  #     - traefik_certs:/letsencrypt
+  #   networks:
+  #     - fachopol_net
+
+volumes:
+  fachopol_data:
+    driver: local
+  # traefik_certs:
+  #   driver: local
+
+networks:
+  fachopol_net:
+    driver: bridge

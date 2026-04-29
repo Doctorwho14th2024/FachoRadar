@@ -1,20 +1,116 @@
 import './style.css'
 
-const API_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://localhost:8443/api'
-  : 'http://localhost:3000/api';
-const API_KEY = '483ed852097d86177b4d4722e322ae4f7063429fcb2c45bd64d6b98713cecb02';
+// En production l'API est servie par le même serveur.
+// En dev, Vite proxy /api vers Express (voir vite.config.js).
+const API_URL = import.meta.env.VITE_API_URL || '/api';
 
-// Headers pour les requêtes
 const headers = {
-  'Content-Type': 'application/json',
-  'x-api-key': API_KEY
+  'Content-Type': 'application/json'
 };
 
-// Gestion de l'état de la connexion
+
+function escapeHTML(str) {
+  if (!str) return '';
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
 const connectionStatus = document.getElementById('connectionStatus')
+const form = document.getElementById('fachoForm')
+const formTitle = document.getElementById('formTitle')
+const message = document.getElementById('message')
+const listContainer = document.getElementById('fachoList')
+const searchInput = document.getElementById('searchInput')
+const statusFilter = document.getElementById('statusFilter')
+const categoryFilter = document.getElementById('categoryFilter')
+const dateFromFilter = document.getElementById('dateFromFilter')
+const dateToFilter = document.getElementById('dateToFilter')
+const clearFilters = document.getElementById('clearFilters')
+const resultCount = document.getElementById('resultCount')
+const submitLabel = document.getElementById('submitLabel')
+const cancelEdit = document.getElementById('cancelEdit')
+const logoutBtn = document.getElementById('logoutBtn')
+const panelList = document.getElementById('panelList')
+const panelForm = document.getElementById('panelForm')
+const tabList = document.getElementById('tabList')
+const tabForm = document.getElementById('tabForm')
+
+let fachos = []
+let editingId = null
+
+const statusLabels = {
+  a_verifier: 'À vérifier',
+  verifie: 'Vérifié',
+  rejete: 'Rejeté',
+  doublon: 'Doublon'
+}
+
+const categoryLabels = {
+  propos_haineux: 'Propos haineux',
+  symboles: 'Symboles',
+  symboles_identitaires: 'Symboles identitaires',
+  harcelement: 'Harcèlement',
+  desinformation: 'Désinformation',
+  apologie: 'Apologie',
+  apologie_meurtre: 'Apologie du meurtre',
+  nationalisme: 'Nationalisme',
+  identitaire: 'Identitaire',
+  supremacisme_blanc: 'Suprémacisme blanc',
+  neonazisme: 'Néonazisme',
+  fascisme: 'Fascisme',
+  neofascisme: 'Néofascisme',
+  traditionalisme: 'Traditionalisme réactionnaire',
+  integrisme_religieux: 'Intégrisme religieux',
+  royalisme_extreme_droite: "Royalisme d'extrême droite",
+  conspirationnisme: 'Conspirationnisme',
+  masculinisme: 'Masculinisme',
+  accelerationnisme: 'Accélérationnisme',
+  autre: 'Autre'
+}
+
+async function fetchJSON(url, options = {}) {
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), 8000)
+
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal
+    })
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        window.location.href = '/login'
+        throw new Error('Connexion requise')
+      }
+
+      let errorMessage = `Erreur serveur: ${response.status} ${response.statusText}`
+      try {
+        const errorData = await response.json()
+        errorMessage = errorData.error || errorData.errors?.[0]?.msg || errorMessage
+      } catch (_) {
+        const errorText = await response.text()
+        errorMessage = errorText || errorMessage
+      }
+      const error = new Error(errorMessage)
+      error.status = response.status
+      throw error
+    }
+
+    return response.json()
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      throw new Error('Le serveur ne répond pas. Vérifie que le backend est lancé.')
+    }
+    throw error
+  } finally {
+    clearTimeout(timeout)
+  }
+}
 
 function updateConnectionStatus(status) {
+  if (!connectionStatus) return
   const [dot, text] = connectionStatus.children
   
   switch (status) {
@@ -42,14 +138,48 @@ function updateConnectionStatus(status) {
   }
 }
 
+function switchTab(tab) {
+  const isDesktop = window.innerWidth >= 1024
+  if (isDesktop || !panelList || !panelForm || !tabList || !tabForm) return
+
+  if (tab === 'list') {
+    panelList.classList.remove('hidden')
+    panelForm.classList.add('hidden')
+    tabList.classList.add('active', 'text-red-400')
+    tabList.classList.remove('text-gray-500')
+    tabForm.classList.remove('active', 'text-red-400')
+    tabForm.classList.add('text-gray-500')
+  } else {
+    panelForm.classList.remove('hidden')
+    panelList.classList.add('hidden')
+    tabForm.classList.add('active', 'text-red-400')
+    tabForm.classList.remove('text-gray-500')
+    tabList.classList.remove('active', 'text-red-400')
+    tabList.classList.add('text-gray-500')
+    setTimeout(() => document.getElementById('inputPseudo')?.focus(), 100)
+  }
+}
+
+function initLayout() {
+  if (!panelList || !panelForm) return
+
+  const isDesktop = window.innerWidth >= 1024
+  if (isDesktop) {
+    panelList.classList.remove('hidden')
+    panelForm.classList.remove('hidden')
+  } else {
+    panelList.classList.remove('hidden')
+    panelForm.classList.add('hidden')
+  }
+}
+
 // Test de connexion au serveur avec retry
 async function testConnection(retries = 3) {
   updateConnectionStatus('connecting')
   for (let i = 0; i < retries; i++) {
     try {
       console.log(`Tentative de connexion ${i + 1}/${retries}...`)
-      const response = await fetch(`${API_URL}/fachos`, { headers })
-      if (!response.ok) throw new Error('Erreur serveur')
+      await fetchJSON(`${API_URL}/fachos`, { headers })
       console.log('✅ Connexion au serveur réussie')
       updateConnectionStatus('connected')
       return true
@@ -60,75 +190,171 @@ async function testConnection(retries = 3) {
       }
     }
   }
-  message.textContent = "Impossible de se connecter au serveur. Veuillez recharger la page."
-  message.classList.add('text-red-400')
+  if (message) {
+    message.textContent = "Impossible de se connecter au serveur. Lance `npm run server` puis recharge la page."
+    message.classList.add('text-red-400')
+  }
   updateConnectionStatus('error')
   return false
 }
-testConnection()
 
-const form = document.getElementById('fachoForm')
-const message = document.getElementById('message')
-const listContainer = document.getElementById('fachoList')
-const searchInput = document.getElementById('searchInput')
+function normalizePseudo(pseudo = '') {
+  return pseudo.trim().replace(/^@+/, '').toLowerCase()
+}
 
-let fachos = []
+function getFilters() {
+  return {
+    query: searchInput?.value.trim().toLowerCase() || '',
+    status: statusFilter?.value || '',
+    categorie: categoryFilter?.value || '',
+    dateFrom: dateFromFilter?.value || '',
+    dateTo: dateToFilter?.value || ''
+  }
+}
 
-function renderList(filter = '') {
+function matchesDate(f, filters) {
+  if (!filters.dateFrom && !filters.dateTo) return true
+
+  const created = new Date(f.created_at)
+  if (Number.isNaN(created.getTime())) return false
+
+  if (filters.dateFrom) {
+    const from = new Date(`${filters.dateFrom}T00:00:00`)
+    if (created < from) return false
+  }
+
+  if (filters.dateTo) {
+    const to = new Date(`${filters.dateTo}T23:59:59`)
+    if (created > to) return false
+  }
+
+  return true
+}
+
+function getFilteredFachos() {
+  const filters = getFilters()
+
+  return fachos.filter(f => {
+    const queryTarget = [
+      f.pseudo,
+      f.nickname,
+      f.preuve,
+      f.lien,
+      categoryLabels[f.categorie] || f.categorie,
+      statusLabels[f.status] || f.status
+    ].join(' ').toLowerCase()
+
+    return (!filters.query || queryTarget.includes(filters.query)) &&
+      (!filters.status || (f.status || 'a_verifier') === filters.status) &&
+      (!filters.categorie || (f.categorie || 'autre') === filters.categorie) &&
+      matchesDate(f, filters)
+  })
+}
+
+function renderList() {
   listContainer.innerHTML = ''
 
-  const filtered = fachos.filter(f =>
-    f.pseudo.toLowerCase().includes(filter.toLowerCase()) ||
-    f.preuve.toLowerCase().includes(filter.toLowerCase())
-  )
+  const filtered = getFilteredFachos()
+  if (resultCount) {
+    resultCount.textContent = `${filtered.length} résultat${filtered.length > 1 ? 's' : ''}`
+  }
 
   if (filtered.length === 0) {
-    listContainer.innerHTML = '<p class="text-gray-400">Aucun compte trouvé.</p>'
+    listContainer.innerHTML = `
+      <div class="empty-state">
+        <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" opacity="0.4">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        <p class="text-sm font-medium">Aucun compte trouvé</p>
+      </div>`
     return
   }
 
   filtered.forEach(f => {
+    const status = f.status || 'a_verifier'
+    const categorie = f.categorie || 'autre'
     const div = document.createElement('div')
-    div.className = 'bg-gray-800/50 p-6 rounded-xl border border-gray-700/50 backdrop-blur-sm shadow-lg card-animation card-hover'
+    div.className = 'card-animation list-wrapper'
+    div.dataset.fachoId = f.id
     div.innerHTML = `
-      <div class="flex items-start justify-between">
-        <h3 class="text-xl font-bold text-gray-100 flex items-center gap-2">
-          <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-          </svg>
-          ${f.pseudo}
-        </h3>
-        <span class="text-xs text-gray-400">${new Date(f.created_at).toLocaleDateString()}</span>
+      <div class="facho-card p-5 sm:p-6">
+        <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-full overflow-hidden border border-white/10 bg-white/5 shrink-0 flex items-center justify-center relative">
+              <svg class="w-5 h-5 text-red-500/60 absolute" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+              ${f.avatar ? `<img src="${escapeHTML(f.avatar)}" alt="Avatar" class="avatar-img w-full h-full object-cover relative z-10">` : ''}
+            </div>
+            <div>
+              <h3 class="text-base font-bold text-white font-['Outfit'] leading-tight">${escapeHTML(f.nickname || f.pseudo)}</h3>
+              <span class="text-xs text-red-400/80 font-medium">@${escapeHTML(f.pseudo.replace(/^@/, ''))}</span>
+            </div>
+          </div>
+          <span class="text-[11px] font-medium px-2.5 py-1 bg-white/5 rounded-full border border-white/10 text-gray-500 whitespace-nowrap shrink-0">
+            ${new Date(f.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}
+          </span>
+        </div>
+
+        <div class="mt-4 flex flex-wrap gap-2">
+          <span class="badge badge-status-${escapeHTML(status)}">${escapeHTML(statusLabels[status] || status)}</span>
+          <span class="badge">${escapeHTML(categoryLabels[categorie] || categorie)}</span>
+        </div>
+
+        <div class="mt-4 pl-3 border-l border-white/10">
+          <p class="text-gray-400 text-sm leading-relaxed whitespace-pre-wrap">${escapeHTML(f.preuve)}</p>
+        </div>
+
+        <div class="mt-4 pt-3 border-t border-white/8 flex flex-wrap items-center justify-between gap-3">
+          <a class="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-red-500/70 hover:text-red-400 transition-colors"
+             href="${escapeHTML(f.lien)}" target="_blank" rel="noopener noreferrer">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+            Voir le profil TikTok
+          </a>
+          <button type="button" class="edit-btn" data-edit-id="${f.id}">
+            Modifier
+          </button>
+        </div>
       </div>
-      <a class="mt-2 inline-flex items-center text-red-400 hover:text-red-300 transition-colors" 
-         href="${f.lien}" target="_blank" rel="noopener noreferrer">
-        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-        </svg>
-        Voir le compte
-      </a>
-      <p class="mt-3 text-gray-300 whitespace-pre-wrap">${f.preuve}</p>
     `
     listContainer.appendChild(div)
   })
+
+  listContainer.querySelectorAll('.avatar-img').forEach(img => {
+    img.addEventListener('error', () => {
+      img.remove()
+    }, { once: true })
+  })
+}
+
+function setFormMode(mode, facho = null) {
+  if (mode === 'edit' && facho) {
+    editingId = facho.id
+    formTitle.lastChild.textContent = ' Modifier le signalement'
+    submitLabel.textContent = 'ENREGISTRER'
+    cancelEdit.classList.remove('hidden')
+    form.pseudo.value = facho.pseudo || ''
+    form.lien.value = facho.lien || ''
+    form.preuve.value = facho.preuve || ''
+    form.status.value = facho.status || 'a_verifier'
+    form.categorie.value = facho.categorie || 'autre'
+    form.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    return
+  }
+
+  editingId = null
+  formTitle.lastChild.textContent = ' Signaler un facho'
+  submitLabel.textContent = 'SIGNALER LE FACHO'
+  cancelEdit.classList.add('hidden')
+  form.reset()
 }
 
 async function loadFachos(newItemId = null) {
   try {
     console.log('Tentative de chargement des données...')
-    const response = await fetch(`${API_URL}/fachos`, { headers })
-    
-    if (!response.ok) {
-      console.error('Réponse serveur non-ok:', {
-        status: response.status,
-        statusText: response.statusText
-      })
-      const errorText = await response.text()
-      console.error('Contenu de l\'erreur:', errorText)
-      throw new Error(`Erreur serveur: ${response.status} ${response.statusText}`)
-    }
-    
-    fachos = await response.json()
+    fachos = await fetchJSON(`${API_URL}/fachos`, { headers })
     console.log(`✅ ${fachos.length} comptes chargés`)
     renderList()
 
@@ -146,6 +372,10 @@ async function loadFachos(newItemId = null) {
     message.textContent = `Erreur: ${error.message || 'Impossible de charger les données'}`
     message.classList.remove('text-green-400')
     message.classList.add('text-red-400')
+    listContainer.innerHTML = `
+      <div class="empty-state">
+        <p class="text-sm font-medium text-red-400">Impossible de charger les données</p>
+      </div>`
   }
 }
 
@@ -156,6 +386,8 @@ form.addEventListener('submit', async (e) => {
   const pseudo = form.pseudo.value.trim()
   const lien = form.lien.value.trim()
   const preuve = form.preuve.value.trim()
+  const status = form.status.value
+  const categorie = form.categorie.value
 
   // Validation basique
   if (pseudo.length < 3) {
@@ -180,35 +412,100 @@ form.addEventListener('submit', async (e) => {
     return
   }
 
+  const duplicate = fachos.find(f =>
+    normalizePseudo(f.pseudo) === normalizePseudo(pseudo) &&
+    Number(f.id) !== Number(editingId)
+  )
+
+  if (duplicate) {
+    showError(`@${normalizePseudo(pseudo)} est déjà présent.`)
+    const existingCard = document.querySelector(`[data-facho-id="${duplicate.id}"]`)
+    existingCard?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    return
+  }
+
   try {
-    const response = await fetch(`${API_URL}/fachos`, {
-      method: 'POST',
+    const url = editingId ? `${API_URL}/fachos/${editingId}` : `${API_URL}/fachos`
+    const savedFacho = await fetchJSON(url, {
+      method: editingId ? 'PUT' : 'POST',
       headers,
-      body: JSON.stringify({ pseudo, lien, preuve })
+      body: JSON.stringify({ pseudo, lien, preuve, status, categorie })
     })
 
-    if (!response.ok) {
-      const error = await response.json()
-      throw new Error(error.error || 'Erreur lors de l\'ajout')
-    }
-
-    const newFacho = await response.json()
-    message.textContent = "✅ Compte ajouté avec succès"
+    message.textContent = editingId ? "✅ Signalement modifié" : "✅ Compte ajouté avec succès"
     message.classList.remove('text-red-400')
     message.classList.add('text-green-400')
-    form.reset()
-    await loadFachos(newFacho.id) // Passer l'ID du nouveau compte pour le mettre en évidence
+    setFormMode('create')
+    await loadFachos(savedFacho.id) // Passer l'ID pour le mettre en évidence
   } catch (error) {
     console.error('Erreur:', error)
-    message.textContent = error.message
+    message.textContent = error.status === 409 ? `Déjà présent: ${error.message}` : error.message
     message.classList.remove('text-green-400')
     message.classList.add('text-red-400')
   }
 })
 
-searchInput.addEventListener('input', () => {
-  renderList(searchInput.value)
+listContainer.addEventListener('click', (event) => {
+  const editButton = event.target.closest('[data-edit-id]')
+  if (!editButton) return
+
+  const facho = fachos.find(item => Number(item.id) === Number(editButton.dataset.editId))
+  if (facho) {
+    setFormMode('edit', facho)
+    if (window.innerWidth < 1024) {
+      switchTab('form')
+    }
+  }
 })
+
+cancelEdit.addEventListener('click', () => {
+  setFormMode('create')
+  message.textContent = ''
+})
+
+;[searchInput, statusFilter, categoryFilter, dateFromFilter, dateToFilter].forEach(input => {
+  input?.addEventListener('input', renderList)
+  input?.addEventListener('change', renderList)
+})
+
+clearFilters.addEventListener('click', () => {
+  searchInput.value = ''
+  statusFilter.value = ''
+  categoryFilter.value = ''
+  dateFromFilter.value = ''
+  dateToFilter.value = ''
+  renderList()
+})
+
+logoutBtn?.addEventListener('click', async () => {
+  try {
+    await fetchJSON(`${API_URL}/logout`, {
+      method: 'POST',
+      headers
+    })
+  } finally {
+    window.location.href = '/login'
+  }
+})
+
+tabList?.addEventListener('click', () => switchTab('list'))
+tabForm?.addEventListener('click', () => switchTab('form'))
+window.addEventListener('resize', initLayout)
+initLayout()
+
+form?.addEventListener('submit', () => {
+  if (window.innerWidth < 1024) {
+    setTimeout(() => switchTab('list'), 1500)
+  }
+})
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(reg => console.log('SW enregistré:', reg.scope))
+      .catch(err => console.warn('SW échec:', err))
+  })
+}
 
 // Fonctions utilitaires
 function isValidURL(string) {
@@ -230,4 +527,11 @@ function showError(message) {
   }, 5000)
 }
 
-loadFachos()
+async function initApp() {
+  const connected = await testConnection()
+  if (connected) {
+    await loadFachos()
+  }
+}
+
+initApp()

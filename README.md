@@ -1,197 +1,204 @@
-
-# 🎯 Fachopol - La Vigie Antifasciste
-
 <div align="center">
-  <img src="p## 🛠 Stack Technique
-
-<table>
-<tr>
-  <th>Frontend</th>
-  <th>Backend</th>
-  <th>Infrastructure</th>
-</tr>
-<tr>
-<td>
-
-- ⚡️ Vite.js
-- 🎨 TailwindCSS
-- 📱 Responsive Design
-
-</td>
-<td>
-
-- 🚀 Express.js
-- 🗄 SQLite3
-- 🔑 JWT Auth
-
-</td>
-<td>
-
-- 🚂 Railway.app
-- 🔒 Let's Encrypt
-- 🚦 PM2
-
-</td>
-</tr>
-</table>
-
-## 📝 Commandes principales
-
-| Commande | Description |
-|----------|-------------|
-| `npm run dev` | Lance l'environnement de développement |
-| `npm run build` | Construit l'application pour la production |
-| `npm run start:prod` | Démarre le serveur en mode production |
-| `npm run deploy:railway` | Déploie sur Railway.app |on.svg" alt="Fachopol Logo" width="150" height="150" />
+  <img src="public/img/logo.png" alt="Fachopol Logo" width="200" style="border-radius: 20px; box-shadow: 0 0 20px rgba(220, 38, 38, 0.4);" />
   
-  <h3>📊 Base de données collaborative antifasciste</h3>
+  <br/><br/>
+  
+  <h1>Fachopol - La Vigie Antifasciste</h1>
+  
+  <h3>Base de données collaborative et sécurisée</h3>
   
   <p><em>Identifier • Documenter • Combattre</em></p>
 
   <br/>
 
-  [![Déployé sur Railway](https://img.shields.io/badge/🚂_Déployé_sur-Railway-131415?style=for-the-badge)](https://railway.app)
-  [![Discord](https://img.shields.io/badge/💬_Rejoins_le-Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/antifa)
-  
-  [![Made with Vite](https://img.shields.io/badge/⚡️_VITE-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
-  [![Styled with Tailwind](https://img.shields.io/badge/🎨_TAILWIND-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
-  [![Powered by Express](https://img.shields.io/badge/🛠_EXPRESS-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com)
+  <!-- Stack -->
+  [![Vite](https://img.shields.io/badge/VITE-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
+  [![TailwindCSS](https://img.shields.io/badge/TAILWIND-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
+  [![Express](https://img.shields.io/badge/EXPRESS-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com)
+  [![SQLite](https://img.shields.io/badge/SQLITE-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://sqlite.org)
+  [![Node.js](https://img.shields.io/badge/NODE.JS-20+-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org)
 
-## 🎯 Mission
+  <!-- Qualite -->
+  [![Version](https://img.shields.io/badge/version-1.0.0-dc2626?style=for-the-badge)](https://github.com/Doctorwho14th2024/Fachopol)
+  [![Licence MIT](https://img.shields.io/badge/licence-MIT-22c55e?style=for-the-badge)](LICENSE)
+  [![Docker](https://img.shields.io/badge/DOCKER-ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)](docker-compose.yml)
+  [![PWA](https://img.shields.io/badge/PWA-installable-7c3aed?style=for-the-badge&logo=pwa&logoColor=white)](#)
+  [![Mise a jour](https://img.shields.io/badge/mise_a_jour-avril_2026-f59e0b?style=for-the-badge)](#)
+</div>
 
-> **Fachopol** est un outil militant développé pour la communauté antifasciste. Il permet d'identifier, documenter et combattre la présence de l'extrême-droite sur les réseaux sociaux.
+<br/>
 
-## ⚡️ Fonctionnalités Principales
+## Mission
 
-<table>
-<tr>
-  <td width="33%">
-    <h3>🔍 Tracking Intelligent</h3>
-    <ul>
-      <li>Identification automatique</li>
-      <li>Recherche avancée</li>
-      <li>Filtres multicritères</li>
-    </ul>
-  </td>
-  <td width="33%">
-    <h3>📊 Analytics</h3>
-    <ul>
-      <li>Visualisation des réseaux</li>
-      <li>Statistiques en temps réel</li>
-      <li>Tendances & patterns</li>
-    </ul>
-  </td>
-  <td width="33%">
-    <h3>🔐 Sécurité</h3>
-    <ul>
-      <li>Données chiffrées</li>
-      <li>Anonymisation</li>
-      <li>API sécurisée</li>
-    </ul>
-  </td>
-</tr>
-</table>
+> **Fachopol** est un outil militant développé pour la communauté antifasciste. Il permet d'identifier, documenter et combattre la présence de l'extrême-droite sur les réseaux sociaux. 
 
-## 🚀 Installation
+L'application offre une interface moderne, sécurisée et rapide pour le signalement de comptes problématiques sur TikTok.
 
+> **Note importante** : Fachopol est actuellement conçu uniquement pour TikTok. Les liens acceptés doivent pointer vers `tiktok.com` ; les autres plateformes ne sont pas prises en charge.
 
-## 🚀 Démarrage Rapide
+## Fonctionnalités Principales
 
-\`\`\`bash
-# 1️⃣ Cloner le projet
+| Tracking Intelligent | Interface Moderne | Sécurité Renforcée |
+|-------------------------|----------------------|-----------------------|
+| • Signalement rapide<br>• Comptes TikTok uniquement<br>• Lien et preuves intégrées<br>• Recherche instantanée | • UI Glassmorphism<br>• Animations fluides<br>• Dark Mode optimisé | • Protection XSS active<br>• Requêtes préparées (Anti-SQLi)<br>• Anti-Spam (Rate Limit) |
+
+## Stack Technique
+
+### Frontend
+- **Framework** : Vite.js + Vanilla JS
+- **Styling** : TailwindCSS v3 (Glassmorphism & animations personnalisées)
+- **Typographie** : Outfit & Inter (Google Fonts)
+
+### Backend
+- **Serveur** : Express.js
+- **Base de données** : SQLite3 (`better-sqlite3` avec mode WAL)
+- **Sécurité** : `helmet`, `express-rate-limit`, `express-validator`
+
+## Démarrage Rapide
+
+```bash
+# 1. Cloner le projet
 git clone https://github.com/Doctorwho14th2024/Fachopol.git
 
-# 2️⃣ Installation
+# 2. Installation
 cd Fachopol && npm install
 
-# 3️⃣ Démarrer l'application
-npm run dev
-\`\`\`
+# 3. Démarrer l'application (Client + Serveur)
+npm run start
+```
 
 L'application sera accessible sur :
-- 🌐 Interface Web : [http://localhost:5173](http://localhost:5173)
-- 🔧 API : [http://localhost:3000/api](http://localhost:3000/api)
+- Interface Web : [http://localhost:5173](http://localhost:5173)
+- API : [http://localhost:3000/api](http://localhost:3000/api)
 
-## 🧰 Stack Technique
+## Commandes principales
 
-- **Frontend**: Vite, TailwindCSS
-- **Backend**: Express.js
-- **Base de données**: SQLite, Supabase
-- **Outils**: Sharp (traitement d'images)
+| Commande | Description |
+|----------|-------------|
+| `npm run dev` | Lance le client Vite en mode dev |
+| `npm run server` | Lance le serveur Express en mode dev |
+| `npm run start` | Lance **les deux** simultanément |
+| `npm run build` | Construit l'application pour la production |
+| `npm run start:prod` | Démarre l'application complète en production |
+| `npm run deploy:railway` | Déploie sur Railway.app |
 
-## 📝 Scripts disponibles
+## Deploiement (Production)
 
-- \`npm run dev\`: Lance le serveur de développement Vite
-- \`npm run build\`: Compile le projet pour la production
-- \`npm run preview\`: Prévisualise la version de production
-- \`npm run server\`: Démarre le serveur Express
-- \`npm run start\`: Lance le serveur et le client en parallèle
-- \`npm run init-db\`: Initialise la base de données
+<details open>
+<summary>Docker / Docker Compose (Recommande)</summary>
 
-## 📦 Déploiement
+Installation automatique avec un script indépendant :
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Doctorwho14th2024/FachoRadar/main/install-fachoradar.sh | bash
+```
+
+Avec domaine et port :
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Doctorwho14th2024/FachoRadar/main/install-fachoradar.sh | DOMAIN=fachoradar.example.com PORT=3000 bash
+```
+
+Ou en téléchargement manuel :
+
+```bash
+curl -fsSLO https://raw.githubusercontent.com/Doctorwho14th2024/FachoRadar/main/install-fachoradar.sh
+chmod +x install-fachoradar.sh
+./install-fachoradar.sh
+```
+
+Le script crée un dossier de déploiement autonome avec `.env`, `docker-compose.yml`, secrets générés, configuration Pangolin/reverse proxy et image `liberchat/fachoradar:latest`.
+
+Copier le fichier d'environnement :
+
+```bash
+cp .env.example .env
+# Editer .env avec vos valeurs
+```
+
+Lancer avec Docker Compose :
+
+```bash
+# Build et demarrage en arriere-plan
+docker compose up -d --build
+
+# Voir les logs en direct
+docker compose logs -f
+
+# Arreter le service
+docker compose down
+
+# Arreter ET supprimer les donnees (attention : irreversible)
+docker compose down -v
+```
+
+La base de donnees SQLite est persistee dans le volume Docker `fachopol_data` — elle survit aux redemarrages du conteneur.
+
+Pour HTTPS automatique via Let's Encrypt, decommenter la section `traefik` dans `docker-compose.yml` et definir `DOMAIN=votredomaine.fr` dans votre `.env`.
+
+Pour un reverse proxy externe comme Pangolin, exposez le conteneur sur `3000` et configurez le proxy vers `http://fachopol:3000` ou `http://IP_DU_SERVEUR:3000`. Gardez `TRUST_PROXY=1` pour que l'app comprenne les headers `X-Forwarded-Proto` et génère correctement les cookies derrière HTTPS.
+
+</details>
 
 <details>
-<summary>🚂 Sur Railway.app (Recommandé)</summary>
+<summary>Sur Railway.app</summary>
 
-\`\`\`bash
-# Installation du CLI Railway
+```bash
 npm i -g @railway/cli
-
-# Login
 railway login
-
-# Déploiement
 npm run deploy:railway
-\`\`\`
+```
 
 </details>
 
 <details>
-<summary>🖥 Auto-hébergement</summary>
+<summary>Auto-hebergement (bare metal)</summary>
 
-\`\`\`bash
-# 1. Prérequis
+```bash
 sudo apt update && sudo apt install -y nodejs npm certbot
-
-# 2. Configuration SSL
 npm run deploy:setup-ssl
-
-# 3. Démarrage production
 npm run start:prod
-\`\`\`
+```
 
 </details>
 
-## 🔐 Variables d'Environnement
+## Configuration (Variables d'Environnement)
+
+Renommez le fichier `.env.example` en `.env` :
 
 | Variable | Description | Défaut |
 |----------|-------------|---------|
-| `PORT` | Port HTTP | 3000 |
+| `PORT` | Port HTTP du serveur | 3000 |
 | `HTTPS_PORT` | Port HTTPS | 443 |
-| `API_KEY` | Clé API secrète | - |
-| `JWT_SECRET` | Secret JWT | - |
-| `DB_PATH` | Chemin BDD | ./data/database.db |
-| `CORS_ORIGIN` | Origine CORS | * |
+| `DB_PATH` | Chemin de la base SQLite | `./data/database.db` |
+| `CORS_ORIGIN` | Origine CORS autorisée | `*` |
+| `APP_PASSWORD` | Mot de passe de connexion à l'app | requis |
+| `SESSION_SECRET` | Secret long pour signer les cookies | requis |
+| `TRUST_PROXY` | Active la confiance envers le reverse proxy (`1` derrière Pangolin/Traefik/Nginx) | `1` en production |
+| `PUBLIC_URL` | URL publique derrière le proxy | vide |
+| `COOKIE_SECURE` | `auto`, `true` ou `false` pour l'attribut Secure | `auto` |
+| `COOKIE_SAMESITE` | Politique SameSite du cookie | `Lax` |
+| `COOKIE_DOMAIN` | Domaine cookie partagé, ex. `.example.com` pour multi-sous-domaines | vide |
 
-## 🛡 Sécurité
+## Sécurité
 
-- **Chiffrement** : AES-256 pour les données sensibles
-- **API** : Rate limiting et protection CORS
-- **Authentification** : JWT + API Key
-- **Anonymisation** : Aucune donnée personnelle stockée
-- **Logs** : Rotation automatique et chiffrement
+- **Protection XSS** : `express-validator` côté serveur et `escapeHTML()` côté client.
+- **Protection SQLi** : Requêtes préparées strictes.
+- **Rate limiting** : Protection DDoS et Anti-Spam activée.
+- **Headers HTTP** : Sécurisés via `helmet`.
+- **Anonymat** : Aucune adresse IP ou donnée personnelle n'est stockée dans la base de données de signalement.
 
-## 🤝 Contribution
+## Contribution
 
-Les contributions sont essentielles ! La lutte antifasciste est collective :
+La lutte antifasciste est collective ! Vos contributions sont les bienvenues.
 
-1. 🍴 Fork le projet
-2. 🌿 Crée une branche (`git checkout -b feature/AmazingFeature`)
-3. 🔧 Commit tes changements (`git commit -m 'Add: Amazing Feature'`)
-4. 📤 Push vers la branche (`git push origin feature/AmazingFeature`)
-5. 🔍 Ouvre une Pull Request
+1. Fork le projet
+2. Crée une branche (`git checkout -b feature/NouvelleIdee`)
+3. Commit tes changements (`git commit -m 'Ajout: Nouvelle idée'`)
+4. Push vers la branche (`git push origin feature/NouvelleIdee`)
+5. Ouvre une Pull Request
 
-## 📄 Licence
+## Licence
 
 Distribué sous licence MIT. Voir [`LICENSE`](LICENSE) pour plus d'informations.
 
@@ -199,12 +206,8 @@ Distribué sous licence MIT. Voir [`LICENSE`](LICENSE) pour plus d'informations.
 
 <div align="center">
 
-### 🌟 La lutte antifasciste ne s'arrête jamais 🌟
+### La lutte antifasciste ne s'arrête jamais
 
-<sub>Made with ❤️ by the antifascist community</sub>
-<br/>
-<sub>Version 1.0.0 | © 2025</sub>
+<sub>Version 1.0.0 | © 2026</sub>
 
 </div>
-
-

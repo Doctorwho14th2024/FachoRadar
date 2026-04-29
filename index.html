@@ -2,102 +2,281 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Fachopol - La Vigie Antifa des Fachos</title>
-  
-  <!-- Favicon et thème -->
-  <link rel="icon" type="image/svg+xml" href="/img/favicon.svg">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Fachopol - La Vigie Antifa</title>
+
+  <!-- Favicon -->
   <link rel="icon" type="image/png" href="/img/favicon.png">
-  <meta name="theme-color" content="#ef4444">
-  
-  <!-- Métadonnées -->
-  <meta name="description" content="Plateforme collaborative pour identifier, documenter et agir contre les comptes fachos sur les réseaux sociaux.">
-  <meta name="application-name" content="Fachopol - La Vigie Antifa des Fachos">
-  
+  <link rel="apple-touch-icon" href="/img/logo.png">
+
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#dc2626">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Fachopol">
+
+  <!-- SEO -->
+  <meta name="description" content="Plateforme collaborative pour identifier, documenter et agir contre les comptes d'extrême droite.">
+  <meta name="application-name" content="Fachopol">
+
   <!-- Styles -->
   <link href="/style.css" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.bunny.net/css?family=inter:300,400,500,600,700|outfit:500,700,800&display=swap" rel="stylesheet">
 </head>
-<body class="bg-gradient-to-br from-gray-900 to-black text-gray-100 min-h-screen font-sans">
-  <div class="max-w-4xl mx-auto p-6">
-    <header class="flex items-center justify-between mb-12 bg-gray-800/50 p-6 rounded-xl backdrop-blur-sm border border-gray-700/50">
-      <div class="flex items-center gap-4">
-        <div id="connectionStatus" class="absolute top-2 right-2 flex items-center gap-2 text-sm">
-          <span class="inline-block w-2 h-2 rounded-full bg-yellow-500"></span>
-          <span class="text-gray-400">Connexion...</span>
-        </div>
-        <div class="bg-red-500 p-3 rounded-lg">
-          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-        </div>
-        <div>
-          <h1 class="text-3xl font-bold bg-gradient-to-r from-red-500 to-red-300 bg-clip-text text-transparent">Fachopol <span style='font-size:1.2rem;'>🕵️‍♂️</span></h1>
-          <p class="text-gray-400 text-sm">La Vigie Antifa des Fachos</p>
-        </div>
+<body class="bg-grid-pattern min-h-screen font-sans antialiased relative overflow-x-hidden selection:bg-red-500/30 pb-safe">
+
+  <!-- Ambient glows -->
+  <div class="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-red-600/10 blur-[120px] pointer-events-none z-0"></div>
+  <div class="fixed bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-red-800/10 blur-[120px] pointer-events-none z-0"></div>
+
+  <!-- HEADER -->
+  <header class="glass-panel sticky top-0 z-50 px-4 sm:px-6 py-3 flex items-center justify-between border-b border-white/10 safe-top">
+    <div class="flex items-center gap-3">
+      <div class="relative p-1 rounded-xl ring-1 ring-red-500/50 overflow-hidden bg-black shrink-0">
+        <img src="/img/logo.png" class="w-9 h-9 object-contain rounded-lg" alt="Fachopol Logo" />
       </div>
-      <div class="text-sm text-gray-400">
-        Base collaborative d'identification et d'action antifasciste
-      </div>
-    </header>
-
-    <div class="grid md:grid-cols-2 gap-8">
-      <!-- Formulaire d'ajout -->
-      <form id="fachoForm" class="bg-gray-800/50 p-6 rounded-xl shadow-lg backdrop-blur-sm border border-gray-700/50 order-2 md:order-1">
-        <h2 class="text-2xl font-semibold mb-6 flex items-center gap-2">
-          <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          Signaler un compte
-        </h2>
-        
-        <div class="space-y-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-400 mb-1">Pseudo TikTok</label>
-            <input name="pseudo" required 
-              class="w-full p-3 bg-gray-900/50 text-white rounded-lg border border-gray-700/50 focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-colors" 
-              placeholder="@pseudo" />
-          </div>
-          
-          <div>
-            <label class="block text-sm font-medium text-gray-400 mb-1">Lien du compte</label>
-            <input name="lien" required type="url" 
-              class="w-full p-3 bg-gray-900/50 text-white rounded-lg border border-gray-700/50 focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-colors" 
-              placeholder="https://tiktok.com/@..." />
-          </div>
-          
-          <div>
-            <label class="block text-sm font-medium text-gray-400 mb-1">Preuves et contexte</label>
-            <textarea name="preuve" required rows="4"
-              class="w-full p-3 bg-gray-900/50 text-white rounded-lg border border-gray-700/50 focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-colors" 
-              placeholder="Décrivez les propos ou comportements problématiques..."></textarea>
-          </div>
-        </div>
-
-        <div class="mt-6 flex items-center justify-between">
-          <p id="message" class="text-sm"></p>
-          <button type="submit" 
-            class="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white px-6 py-2 rounded-lg font-medium shadow-lg shadow-red-500/20 transition-all transform hover:scale-105">
-            Signaler
-          </button>
-        </div>
-      </form>
-
-      <!-- Liste et recherche -->
-      <div class="order-1 md:order-2">
-        <div class="relative mb-6">
-          <input id="searchInput" 
-            class="w-full pl-10 pr-4 py-3 bg-gray-800/50 text-white rounded-lg border border-gray-700/50 focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-colors" 
-            placeholder="Rechercher par pseudo ou preuve..." />
-          <svg class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-        </div>
-
-        <div id="fachoList" class="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar"></div>
+      <div>
+        <h1 class="text-2xl font-extrabold font-['Outfit'] tracking-tight bg-gradient-to-r from-white via-red-100 to-red-400 bg-clip-text text-transparent leading-none">Fachopol</h1>
+        <p class="text-gray-500 text-[10px] font-bold tracking-widest uppercase mt-0.5">La Vigie Antifa</p>
       </div>
     </div>
-  </div>
+
+    <div class="flex items-center gap-3">
+      <div id="connectionStatus" class="flex items-center gap-2">
+        <span class="relative flex h-2.5 w-2.5">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-yellow-500"></span>
+        </span>
+        <span class="text-xs font-semibold text-gray-400 hidden sm:inline">Connexion...</span>
+      </div>
+      <button id="logoutBtn" type="button" class="logout-btn" title="Se déconnecter">
+        Déconnexion
+      </button>
+    </div>
+  </header>
+
+  <!-- MOBILE TAB BAR (visible uniquement sur mobile) -->
+  <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-50 glass-panel border-t border-white/10 flex safe-bottom" id="mobileNav">
+    <button id="tabList" type="button" data-tab="list" class="tab-btn active flex-1 flex flex-col items-center justify-center py-3 gap-1 text-red-400">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+      <span class="text-[10px] font-bold uppercase tracking-wider">Liste</span>
+    </button>
+    <button id="tabForm" type="button" data-tab="form" class="tab-btn flex-1 flex flex-col items-center justify-center py-3 gap-1 text-gray-500">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <span class="text-[10px] font-bold uppercase tracking-wider">Signaler</span>
+    </button>
+  </nav>
+
+  <!-- CONTENU PRINCIPAL -->
+  <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-24 lg:pb-8 relative z-10">
+
+    <!-- Layout desktop: 2 colonnes -->
+    <div class="grid lg:grid-cols-12 gap-8">
+
+      <!-- PANNEAU FORMULAIRE -->
+      <div id="panelForm" class="lg:col-span-5 mobile-panel hidden lg:block">
+        <div class="lg:sticky lg:top-24">
+          <form id="fachoForm" class="glass-panel p-6 rounded-2xl relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-red-500 to-transparent opacity-50"></div>
+
+            <h2 id="formTitle" class="text-xl font-bold mb-6 flex items-center gap-3 font-['Outfit'] tracking-tight text-white">
+              <span class="bg-red-500/10 p-2 rounded-lg text-red-400 border border-red-500/20">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </span>
+              Signaler un facho
+            </h2>
+
+            <div class="space-y-4">
+              <div>
+                <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Pseudo TikTok</label>
+                <div class="relative">
+                  <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <span class="text-gray-500">@</span>
+                  </div>
+                  <input name="pseudo" id="inputPseudo" required
+                    class="glass-input w-full pl-9 pr-4 py-3.5 font-medium"
+                    placeholder="pseudo_facho" />
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Lien du compte</label>
+                <div class="relative">
+                  <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                    </svg>
+                  </div>
+                  <input name="lien" required type="url"
+                    class="glass-input w-full pl-11 pr-4 py-3.5 font-medium"
+                    placeholder="https://tiktok.com/@..." />
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Preuves & Contexte</label>
+                <textarea name="preuve" required rows="4"
+                  class="glass-input w-full p-4 font-medium resize-none custom-scrollbar"
+                  placeholder="Décrivez les comportements, propos ou symboles problématiques..."></textarea>
+              </div>
+
+              <div class="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Catégorie</label>
+                  <select name="categorie" class="glass-input form-select w-full px-4 py-3.5 font-medium">
+                    <option value="autre">Autre</option>
+                    <optgroup label="Types de contenu">
+                    <option value="propos_haineux">Propos haineux</option>
+                    <option value="symboles">Symboles</option>
+                    <option value="symboles_identitaires">Symboles identitaires</option>
+                    <option value="harcelement">Harcèlement</option>
+                    <option value="desinformation">Désinformation</option>
+                    <option value="apologie">Apologie</option>
+                    <option value="apologie_meurtre">Apologie du meurtre</option>
+                    </optgroup>
+                    <optgroup label="Courants politiques">
+                      <option value="nationalisme">Nationalisme</option>
+                      <option value="identitaire">Identitaire</option>
+                      <option value="supremacisme_blanc">Suprémacisme blanc</option>
+                      <option value="neonazisme">Néonazisme</option>
+                      <option value="fascisme">Fascisme</option>
+                      <option value="neofascisme">Néofascisme</option>
+                      <option value="traditionalisme">Traditionalisme réactionnaire</option>
+                      <option value="integrisme_religieux">Intégrisme religieux</option>
+                      <option value="royalisme_extreme_droite">Royalisme d'extrême droite</option>
+                      <option value="conspirationnisme">Conspirationnisme</option>
+                      <option value="masculinisme">Masculinisme</option>
+                      <option value="accelerationnisme">Accélérationnisme</option>
+                    </optgroup>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Statut</label>
+                  <select name="status" class="glass-input form-select w-full px-4 py-3.5 font-medium">
+                    <option value="a_verifier">À vérifier</option>
+                    <option value="verifie">Vérifié</option>
+                    <option value="rejete">Rejeté</option>
+                    <option value="doublon">Doublon</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-6 flex flex-col gap-3">
+              <button type="submit" class="btn-primary">
+                <span class="shimmer"></span>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                </svg>
+                <span id="submitLabel">SIGNALER LE FACHO</span>
+              </button>
+              <button id="cancelEdit" type="button" class="btn-secondary hidden">
+                Annuler la modification
+              </button>
+              <p id="message" class="text-sm text-center font-medium min-h-[20px]"></p>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- PANNEAU LISTE -->
+      <div id="panelList" class="lg:col-span-7 mobile-panel flex flex-col">
+        <div class="glass-panel rounded-2xl p-4 mb-4 z-20">
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+              <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            <input id="searchInput"
+              class="glass-input w-full pl-12 pr-6 py-4 font-medium"
+              placeholder="Pseudo, preuve ou mot-clé..." />
+          </div>
+
+          <div class="filter-grid grid sm:grid-cols-2 gap-3 mt-3">
+            <select id="statusFilter" class="glass-input filter-control px-4 py-3 text-sm">
+              <option value="">Tous les statuts</option>
+              <option value="a_verifier">À vérifier</option>
+              <option value="verifie">Vérifié</option>
+              <option value="rejete">Rejeté</option>
+              <option value="doublon">Doublon</option>
+            </select>
+
+            <select id="categoryFilter" class="glass-input filter-control px-4 py-3 text-sm">
+              <option value="">Toutes catégories</option>
+              <optgroup label="Types de contenu">
+              <option value="propos_haineux">Propos haineux</option>
+              <option value="symboles">Symboles</option>
+              <option value="symboles_identitaires">Symboles identitaires</option>
+              <option value="harcelement">Harcèlement</option>
+              <option value="desinformation">Désinformation</option>
+              <option value="apologie">Apologie</option>
+              <option value="apologie_meurtre">Apologie du meurtre</option>
+              </optgroup>
+              <optgroup label="Courants politiques">
+                <option value="nationalisme">Nationalisme</option>
+                <option value="identitaire">Identitaire</option>
+                <option value="supremacisme_blanc">Suprémacisme blanc</option>
+                <option value="neonazisme">Néonazisme</option>
+                <option value="fascisme">Fascisme</option>
+                <option value="neofascisme">Néofascisme</option>
+                <option value="traditionalisme">Traditionalisme réactionnaire</option>
+                <option value="integrisme_religieux">Intégrisme religieux</option>
+                <option value="royalisme_extreme_droite">Royalisme d'extrême droite</option>
+                <option value="conspirationnisme">Conspirationnisme</option>
+                <option value="masculinisme">Masculinisme</option>
+                <option value="accelerationnisme">Accélérationnisme</option>
+              </optgroup>
+              <option value="autre">Autre</option>
+            </select>
+
+            <input id="dateFromFilter" type="date" class="glass-input filter-control px-4 py-3 text-sm" aria-label="Date de début" />
+            <input id="dateToFilter" type="date" class="glass-input filter-control px-4 py-3 text-sm" aria-label="Date de fin" />
+          </div>
+
+          <div class="mt-3 flex items-center justify-between gap-3">
+            <p id="resultCount" class="text-xs text-gray-500 font-medium">0 résultat</p>
+            <button id="clearFilters" type="button" class="text-xs font-bold uppercase tracking-widest text-red-500/70 hover:text-red-400 transition-colors">
+              Réinitialiser
+            </button>
+          </div>
+        </div>
+
+        <div class="relative flex-1">
+          <div class="absolute left-6 top-0 bottom-0 w-px bg-gradient-to-b from-red-500/50 via-white/10 to-transparent hidden sm:block"></div>
+          <div id="fachoList" class="space-y-4 lg:max-h-[800px] overflow-y-auto pr-1 sm:pl-12 pb-4 custom-scrollbar relative">
+            <div class="flex items-center justify-center p-12">
+              <div class="w-8 h-8 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <footer class="mt-8 border-t border-white/10 pt-5 text-center text-xs text-gray-500">
+      <a
+        href="https://github.com/Doctorwho14th2024/FachoRadar"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex items-center justify-center gap-2 font-semibold transition-colors hover:text-red-400"
+      >
+        <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.59 2 12.253c0 4.526 2.865 8.365 6.839 9.72.5.095.682-.222.682-.494 0-.244-.009-.89-.014-1.747-2.782.62-3.369-1.376-3.369-1.376-.455-1.186-1.11-1.502-1.11-1.502-.908-.636.069-.623.069-.623 1.004.072 1.532 1.057 1.532 1.057.892 1.567 2.34 1.115 2.91.853.091-.663.349-1.115.635-1.371-2.221-.259-4.555-1.139-4.555-5.066 0-1.119.39-2.034 1.03-2.751-.103-.26-.446-1.302.098-2.713 0 0 .84-.276 2.75 1.051A9.369 9.369 0 0 1 12 6.946c.85.004 1.705.118 2.504.345 1.909-1.327 2.747-1.051 2.747-1.051.546 1.411.203 2.453.1 2.713.64.717 1.028 1.632 1.028 2.751 0 3.937-2.337 4.804-4.566 5.058.359.317.679.944.679 1.902 0 1.372-.013 2.478-.013 2.815 0 .274.18.594.688.493C21.138 20.615 24 16.779 24 12.253 24 6.59 19.523 2 14 2h-2Z" />
+        </svg>
+        Code source du projet
+      </a>
+    </footer>
+  </main>
 
   <script type="module" src="/main.js"></script>
 </body>

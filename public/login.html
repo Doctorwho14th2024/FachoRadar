@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Connexion - Fachopol</title>
+  <link rel="icon" type="image/png" href="/img/favicon.png">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      background:
+        linear-gradient(to right, rgba(255,255,255,0.025) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255,255,255,0.025) 1px, transparent 1px),
+        #080808;
+      background-size: 32px 32px;
+      color: #fff;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      padding: 24px;
+    }
+    main {
+      width: min(100%, 420px);
+      padding: 28px;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      background: rgba(12,12,12,0.82);
+      box-shadow: 0 24px 80px rgba(0,0,0,0.45);
+    }
+    img {
+      width: 56px;
+      height: 56px;
+      display: block;
+      margin-bottom: 20px;
+      border-radius: 14px;
+    }
+    h1 {
+      margin: 0;
+      font-size: 1.6rem;
+      line-height: 1.1;
+    }
+    p {
+      margin: 10px 0 22px;
+      color: rgba(255,255,255,0.54);
+      font-size: 0.92rem;
+      line-height: 1.5;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: rgba(255,255,255,0.62);
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    input {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.05);
+      color: #fff;
+      font: inherit;
+      outline: none;
+    }
+    input:focus {
+      border-color: rgba(220,38,38,0.78);
+      box-shadow: 0 0 0 3px rgba(220,38,38,0.16);
+    }
+    button {
+      width: 100%;
+      margin-top: 16px;
+      padding: 14px 18px;
+      border: 0;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #dc2626, #991b1b);
+      color: #fff;
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+    }
+    .error {
+      display: none;
+      margin-top: 14px;
+      color: #f87171;
+      font-size: 0.86rem;
+    }
+    body.has-error .error { display: block; }
+  </style>
+</head>
+<body>
+  <main>
+    <img src="/img/logo.png" alt="Fachopol" />
+    <h1>Connexion</h1>
+    <p>Accès réservé. Entre le mot de passe configuré sur le serveur.</p>
+    <form method="post" action="/login">
+      <label for="password">Mot de passe</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" required autofocus />
+      <button type="submit">SE CONNECTER</button>
+    </form>
+    <p class="error">Mot de passe incorrect.</p>
+  </main>
+</body>
+</html>

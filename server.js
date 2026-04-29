@@ -231,7 +231,18 @@ app.use(helmet({
 }));
 app.use(rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100
+  max: Number(process.env.RATE_LIMIT_MAX || 1500),
+  message: { error: 'Trop de requêtes, réessayez dans quelques minutes.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: (req) => (
+    req.path === '/health' ||
+    req.path === '/sw.js' ||
+    req.path === '/manifest.json' ||
+    req.path.startsWith('/img/') ||
+    req.path.startsWith('/assets/') ||
+    /\.(?:css|js|png|jpg|jpeg|webp|svg|ico|woff2?)$/i.test(req.path)
+  )
 }));
 
 // Middleware de logging amélioré

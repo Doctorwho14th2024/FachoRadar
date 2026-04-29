@@ -137,7 +137,24 @@ La base de donnees SQLite est persistee dans le volume Docker `fachopol_data` �
 
 Pour HTTPS automatique via Let's Encrypt, decommenter la section `traefik` dans `docker-compose.yml` et definir `DOMAIN=votredomaine.fr` dans votre `.env`.
 
-Pour un reverse proxy externe comme Pangolin, exposez le conteneur sur `3000` et configurez le proxy vers `http://fachopol:3000` ou `http://IP_DU_SERVEUR:3000`. Gardez `TRUST_PROXY=1` pour que l'app comprenne les headers `X-Forwarded-Proto` et génère correctement les cookies derrière HTTPS.
+Pour un reverse proxy externe comme Pangolin, exposez le conteneur sur `3000` et configurez le proxy vers une cible stable :
+
+- Pangolin/Hawser tourne dans un conteneur séparé : utilisez `http://IP_DU_SERVEUR:3000`.
+- Pangolin et Fachopol sont dans le même réseau Docker Compose : utilisez `http://fachopol:3000`.
+- Évitez `http://127.0.0.1:3000` depuis un conteneur Pangolin : cela pointe vers Pangolin lui-même, pas vers l'hôte.
+- Évitez les IP Docker `172.x.x.x` comme `172.18.0.2` : elles peuvent changer après recréation du conteneur et provoquer `no available server`.
+
+Gardez `TRUST_PROXY=1` pour que l'app comprenne les headers `X-Forwarded-Proto` et génère correctement les cookies derrière HTTPS.
+
+Si Pangolin affiche `no available server`, testez depuis le serveur :
+
+```bash
+curl -I http://127.0.0.1:3000/health
+docker compose ps
+docker compose logs --tail=80 fachopol
+```
+
+Si `/health` répond en local mais Pangolin affiche encore `no available server`, corrigez la cible upstream dans Pangolin vers `http://IP_DU_SERVEUR:3000` ou mettez Pangolin et Fachopol sur le même réseau Docker.
 
 Si la connexion revient immédiatement sur `/login`, vérifiez la configuration cookie dans `.env` :
 

@@ -274,7 +274,11 @@ app.get('/health', (req, res) => {
   }
 });
 
-app.use('/img', express.static(path.join(__dirname, 'public', 'img')));
+// Assets publics nécessaires à la page de connexion et à la PWA.
+app.use(express.static(path.join(__dirname, 'public'), {
+  index: false,
+  fallthrough: true
+}));
 
 app.get('/login', (req, res) => {
   if (!APP_PASSWORD || !SESSION_SECRET) {
@@ -329,10 +333,9 @@ app.get('/api/session', (req, res) => {
 
 app.use(requireSession);
 
-// Servir les fichiers statiques uniquement après connexion
+// Servir l'application uniquement après connexion
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, 'dist')));
-  app.use(express.static(path.join(__dirname, 'public')));
 }
 
 // Middleware d'authentification

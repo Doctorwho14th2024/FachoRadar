@@ -139,6 +139,18 @@ Pour HTTPS automatique via Let's Encrypt, decommenter la section `traefik` dans 
 
 Pour un reverse proxy externe comme Pangolin, exposez le conteneur sur `3000` et configurez le proxy vers `http://fachopol:3000` ou `http://IP_DU_SERVEUR:3000`. Gardez `TRUST_PROXY=1` pour que l'app comprenne les headers `X-Forwarded-Proto` et génère correctement les cookies derrière HTTPS.
 
+Si la connexion revient immédiatement sur `/login`, vérifiez la configuration cookie dans `.env` :
+
+```env
+TRUST_PROXY=1
+PUBLIC_URL=https://votre-domaine.example
+COOKIE_SECURE=auto
+COOKIE_SAMESITE=Lax
+COOKIE_DOMAIN=
+```
+
+Laissez `COOKIE_DOMAIN` vide pour un seul domaine. Utilisez uniquement une valeur de type `.example.com` si vous voulez partager la session entre plusieurs sous-domaines. Ne mettez jamais `https://`, un port, ni le sous-domaine complet dans `COOKIE_DOMAIN`.
+
 </details>
 
 <details>

@@ -133,7 +133,7 @@ docker compose down
 docker compose down -v
 ```
 
-La base de donnees SQLite est persistee dans le volume Docker `fachopol_data` — elle survit aux redemarrages du conteneur.
+La base de donnees SQLite et les vidéos de preuve uploadées sont persistées dans le volume Docker `fachopol_data` — elles survivent aux redémarrages du conteneur.
 
 Pour HTTPS automatique via Let's Encrypt, decommenter la section `traefik` dans `docker-compose.yml` et definir `DOMAIN=votredomaine.fr` dans votre `.env`.
 
@@ -229,6 +229,8 @@ Renommez le fichier `.env.example` en `.env` :
 | `COOKIE_SECURE` | `auto`, `true` ou `false` pour l'attribut Secure | `auto` |
 | `COOKIE_SAMESITE` | Politique SameSite du cookie | `Lax` |
 | `COOKIE_DOMAIN` | Domaine cookie partagé, ex. `.example.com` pour multi-sous-domaines | vide |
+| `RATE_LIMIT_MAX` | Nombre de requêtes autorisées par fenêtre de 15 minutes | `1500` |
+| `VIDEO_UPLOAD_MAX_MB` | Taille maximale d'une preuve vidéo uploadée, en Mo (`5120` = 5 Go) | `5120` |
 
 ## Sécurité
 

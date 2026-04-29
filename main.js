@@ -21,6 +21,35 @@ function avatarSrc(url = '') {
   return `${API_URL}/avatar?url=${encodeURIComponent(url)}`
 }
 
+function normalizeVideos(facho = {}) {
+  if (Array.isArray(facho.preuves_videos)) {
+    return facho.preuves_videos.filter(video => video?.path)
+  }
+
+  if (facho.preuve_video) {
+    return [{
+      path: facho.preuve_video,
+      name: facho.preuve_video_name || 'Preuve vidéo',
+      type: facho.preuve_video_type || ''
+    }]
+  }
+
+  return []
+}
+
+function readFormVideos() {
+  try {
+    const videos = JSON.parse(form.dataset.videos || '[]')
+    return Array.isArray(videos) ? videos.filter(video => video?.path) : []
+  } catch (_) {
+    return []
+  }
+}
+
+function setFormVideos(videos = []) {
+  form.dataset.videos = JSON.stringify(videos.filter(video => video?.path))
+}
+
 const connectionStatus = document.getElementById('connectionStatus')
 const form = document.getElementById('fachoForm')
 const formTitle = document.getElementById('formTitle')
@@ -40,9 +69,20 @@ const panelList = document.getElementById('panelList')
 const panelForm = document.getElementById('panelForm')
 const tabList = document.getElementById('tabList')
 const tabForm = document.getElementById('tabForm')
+const proofVideoInput = document.getElementById('proofVideoInput')
+const proofVideoCurrent = document.getElementById('proofVideoCurrent')
 
 let fachos = []
 let editingId = null
+const VIDEO_UPLOAD_MAX_MB = 5120
+const VIDEO_UPLOAD_MAX_BYTES = VIDEO_UPLOAD_MAX_MB * 1024 * 1024
+const allowedVideoTypes = new Set(['video/mp4', 'video/webm', 'video/quicktime', 'video/x-m4v'])
+const videoTypeByExtension = {
+  mp4: 'video/mp4',
+  webm: 'video/webm',
+  mov: 'video/quicktime',
+  m4v: 'video/x-m4v'
+}
 
 const statusLabels = {
   a_verifier: 'À vérifier',
@@ -107,6 +147,61 @@ async function fetchJSON(url, options = {}) {
   } catch (error) {
     if (error.name === 'AbortError') {
       throw new Error('Le serveur ne répond pas. Vérifie que le backend est lancé.')
+    }
+    throw error
+  } finally {
+    clearTimeout(timeout)
+  }
+}
+
+async function uploadVideoProof(file) {
+  if (!file) return null
+
+  const extension = file.name.split('.').pop()?.toLowerCase()
+  const videoType = allowedVideoTypes.has(file.type) ? file.type : videoTypeByExtension[extension]
+
+  if (!videoType) {
+    throw new Error('Format vidéo non autorisé. Utilise MP4, WebM, MOV ou M4V.')
+  }
+
+  if (file.size > VIDEO_UPLOAD_MAX_BYTES) {
+    throw new Error(`Vidéo trop lourde. Maximum: ${VIDEO_UPLOAD_MAX_MB} Mo.`)
+  }
+
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), 2 * 60 * 60 * 1000)
+
+  try {
+    const response = await fetch(`${API_URL}/proofs/video`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': videoType,
+        'X-File-Name': encodeURIComponent(file.name)
+      },
+      body: file,
+      signal: controller.signal
+    })
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        window.location.href = '/login'
+        throw new Error('Connexion requise')
+      }
+
+      let errorMessage = `Erreur upload vidéo: ${response.status} ${response.statusText}`
+      try {
+        const errorData = await response.json()
+        errorMessage = errorData.error || errorMessage
+      } catch (_) {}
+      const error = new Error(errorMessage)
+      error.status = response.status
+      throw error
+    }
+
+    return response.json()
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      throw new Error('Upload vidéo trop long. Réessaie avec un fichier plus léger.')
     }
     throw error
   } finally {
@@ -247,6 +342,8 @@ function getFilteredFachos() {
       f.pseudo,
       f.nickname,
       f.preuve,
+      f.preuve_video_name,
+      normalizeVideos(f).map(video => video.name).join(' '),
       f.lien,
       categoryLabels[f.categorie] || f.categorie,
       statusLabels[f.status] || f.status
@@ -281,6 +378,23 @@ function renderList() {
   filtered.forEach(f => {
     const status = f.status || 'a_verifier'
     const categorie = f.categorie || 'autre'
+    const videos = normalizeVideos(f)
+    const videoBlock = videos.length > 0 ? `
+        <div class="mt-4 space-y-3">
+          ${videos.map((video, index) => `
+          <div class="overflow-hidden rounded-xl border border-white/10 bg-black/30">
+            <video class="proof-video w-full max-h-80 bg-black" controls preload="metadata" playsinline src="${escapeHTML(video.path)}"></video>
+            <div class="flex items-center justify-between gap-3 px-3 py-2 border-t border-white/10">
+              <span class="text-xs text-gray-400 truncate">${escapeHTML(video.name || `Preuve vidéo ${index + 1}`)}</span>
+              <a class="text-[11px] font-bold uppercase tracking-widest text-red-500/70 hover:text-red-400 transition-colors shrink-0"
+                 href="${escapeHTML(video.path)}" target="_blank" rel="noopener noreferrer">
+                Ouvrir
+              </a>
+            </div>
+          </div>
+          `).join('')}
+        </div>
+    ` : ''
     const div = document.createElement('div')
     div.className = 'card-animation list-wrapper'
     div.dataset.fachoId = f.id
@@ -312,6 +426,8 @@ function renderList() {
         <div class="mt-4 pl-3 border-l border-white/10">
           <p class="text-gray-400 text-sm leading-relaxed whitespace-pre-wrap">${escapeHTML(f.preuve)}</p>
         </div>
+
+        ${videoBlock}
 
         <div class="mt-4 pt-3 border-t border-white/8 flex flex-wrap items-center justify-between gap-3">
           <a class="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-red-500/70 hover:text-red-400 transition-colors"
@@ -348,6 +464,14 @@ function setFormMode(mode, facho = null) {
     form.preuve.value = facho.preuve || ''
     form.status.value = facho.status || 'a_verifier'
     form.categorie.value = facho.categorie || 'autre'
+    const videos = normalizeVideos(facho)
+    setFormVideos(videos)
+    if (proofVideoInput) proofVideoInput.value = ''
+    if (proofVideoCurrent) {
+      proofVideoCurrent.textContent = videos.length > 0
+        ? `${videos.length} vidéo${videos.length > 1 ? 's' : ''} déjà liée${videos.length > 1 ? 's' : ''}. Les nouveaux fichiers seront ajoutés.`
+        : ''
+    }
     form.scrollIntoView({ behavior: 'smooth', block: 'start' })
     return
   }
@@ -357,6 +481,8 @@ function setFormMode(mode, facho = null) {
   submitLabel.textContent = 'SIGNALER LE FACHO'
   cancelEdit.classList.add('hidden')
   form.reset()
+  delete form.dataset.videos
+  if (proofVideoCurrent) proofVideoCurrent.textContent = ''
 }
 
 async function loadFachos(newItemId = null) {
@@ -433,11 +559,38 @@ form.addEventListener('submit', async (e) => {
   }
 
   try {
+    const selectedVideos = Array.from(proofVideoInput?.files || [])
+    const videos = readFormVideos()
+
+    for (const [index, selectedVideo] of selectedVideos.entries()) {
+      message.textContent = `Upload vidéo ${index + 1}/${selectedVideos.length}...`
+      message.classList.remove('text-red-400')
+      message.classList.add('text-green-400')
+      const uploadedVideo = await uploadVideoProof(selectedVideo)
+      videos.push({
+        path: uploadedVideo.path,
+        name: uploadedVideo.name,
+        type: uploadedVideo.type
+      })
+    }
+
+    const firstVideo = videos[0] || { path: '', name: '', type: '' }
+
     const url = editingId ? `${API_URL}/fachos/${editingId}` : `${API_URL}/fachos`
     const savedFacho = await fetchJSON(url, {
       method: editingId ? 'PUT' : 'POST',
       headers,
-      body: JSON.stringify({ pseudo, lien, preuve, status, categorie })
+      body: JSON.stringify({
+        pseudo,
+        lien,
+        preuve,
+        status,
+        categorie,
+        preuves_videos: videos,
+        preuve_video: firstVideo.path,
+        preuve_video_name: firstVideo.name,
+        preuve_video_type: firstVideo.type
+      })
     })
 
     message.textContent = editingId ? "✅ Signalement modifié" : "✅ Compte ajouté avec succès"
@@ -494,6 +647,22 @@ logoutBtn?.addEventListener('click', async () => {
   } finally {
     window.location.href = '/login'
   }
+})
+
+proofVideoInput?.addEventListener('change', () => {
+  const files = Array.from(proofVideoInput.files || [])
+  if (!proofVideoCurrent) return
+
+  if (files.length === 0) {
+    const videos = readFormVideos()
+    proofVideoCurrent.textContent = videos.length > 0
+      ? `${videos.length} vidéo${videos.length > 1 ? 's' : ''} déjà liée${videos.length > 1 ? 's' : ''}.`
+      : ''
+    return
+  }
+
+  const totalMb = files.reduce((total, file) => total + file.size, 0) / (1024 * 1024)
+  proofVideoCurrent.textContent = `${files.length} nouvelle${files.length > 1 ? 's' : ''} vidéo${files.length > 1 ? 's' : ''} sélectionnée${files.length > 1 ? 's' : ''} (${totalMb.toFixed(1)} Mo)`
 })
 
 tabList?.addEventListener('click', () => switchTab('list'))

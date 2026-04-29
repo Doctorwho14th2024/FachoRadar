@@ -24,10 +24,17 @@ if (TRUST_PROXY !== 'false') {
 // Configuration de la base de données
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'data', 'database.db');
 const DB_DIR = path.dirname(DB_PATH);
+const UPLOAD_DIR = process.env.UPLOAD_DIR || path.join(__dirname, 'data', 'uploads');
+const VIDEO_UPLOAD_MAX_MB = Number(process.env.VIDEO_UPLOAD_MAX_MB || 5120);
+const VIDEO_UPLOAD_MAX_BYTES = VIDEO_UPLOAD_MAX_MB * 1024 * 1024;
 
 // Créer le dossier data s'il n'existe pas
 if (!fs.existsSync(DB_DIR)) {
   fs.mkdirSync(DB_DIR, { recursive: true });
+}
+
+if (!fs.existsSync(UPLOAD_DIR)) {
+  fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 }
 
 // Initialiser la base de données
@@ -62,7 +69,29 @@ try {
   db.exec('ALTER TABLE fachos ADD COLUMN categorie TEXT DEFAULT "autre"');
 } catch(e) { /* La colonne existe déjà */ }
 
+try {
+  db.exec('ALTER TABLE fachos ADD COLUMN preuve_video TEXT DEFAULT ""');
+} catch(e) { /* La colonne existe déjà */ }
+
+try {
+  db.exec('ALTER TABLE fachos ADD COLUMN preuve_video_name TEXT DEFAULT ""');
+} catch(e) { /* La colonne existe déjà */ }
+
+try {
+  db.exec('ALTER TABLE fachos ADD COLUMN preuve_video_type TEXT DEFAULT ""');
+} catch(e) { /* La colonne existe déjà */ }
+
+try {
+  db.exec('ALTER TABLE fachos ADD COLUMN preuves_videos TEXT DEFAULT "[]"');
+} catch(e) { /* La colonne existe déjà */ }
+
 const normalizePseudo = (pseudo = '') => pseudo.trim().replace(/^@+/, '').toLowerCase();
+const normalizeStoredVideo = (value = '') => {
+  const videoPath = String(value || '').trim();
+  if (!videoPath) return '';
+  if (!/^\/uploads\/[a-f0-9-]+\.(mp4|webm|mov|m4v)$/i.test(videoPath)) return '';
+  return videoPath;
+};
 const allowedCategories = [
   'propos_haineux',
   'symboles',
@@ -85,6 +114,95 @@ const allowedCategories = [
   'accelerationnisme',
   'autre'
 ];
+const allowedVideoTypes = new Set([
+  'video/mp4',
+  'video/webm',
+  'video/quicktime',
+  'video/x-m4v'
+]);
+const videoExtensionsByType = {
+  'video/mp4': 'mp4',
+  'video/webm': 'webm',
+  'video/quicktime': 'mov',
+  'video/x-m4v': 'm4v'
+};
+const cleanVideoName = (value = '') => String(value || '')
+  .replace(/[^\w .@()_-]/g, '')
+  .trim()
+  .slice(0, 140);
+const decodeVideoName = (value = '') => {
+  try {
+    return decodeURIComponent(String(value || ''));
+  } catch (_) {
+    return String(value || '');
+  }
+};
+const videoPayloadFromBody = (bodyPayload = {}, existing = {}) => {
+  const requestedVideos = Array.isArray(bodyPayload.preuves_videos)
+    ? bodyPayload.preuves_videos
+    : null;
+  const existingVideos = parseStoredVideos(existing);
+  const videos = requestedVideos
+    ? requestedVideos
+      .map(video => ({
+        path: normalizeStoredVideo(video?.path),
+        name: cleanVideoName(video?.name) || 'Preuve vidéo',
+        type: allowedVideoTypes.has(String(video?.type || '').toLowerCase())
+          ? String(video.type).toLowerCase()
+          : ''
+      }))
+      .filter(video => video.path)
+    : existingVideos;
+  const firstVideo = videos[0] || { path: '', name: '', type: '' };
+
+  return {
+    videos,
+    videosJson: JSON.stringify(videos),
+    preuveVideo: firstVideo.path,
+    preuveVideoName: firstVideo.path ? firstVideo.name : '',
+    preuveVideoType: firstVideo.path ? firstVideo.type : ''
+  };
+};
+const parseStoredVideos = (row = {}) => {
+  try {
+    const parsed = JSON.parse(row.preuves_videos || '[]');
+    if (Array.isArray(parsed)) {
+      const videos = parsed
+        .map(video => ({
+          path: normalizeStoredVideo(video?.path),
+          name: cleanVideoName(video?.name) || 'Preuve vidéo',
+          type: allowedVideoTypes.has(String(video?.type || '').toLowerCase())
+            ? String(video.type).toLowerCase()
+            : ''
+        }))
+        .filter(video => video.path);
+      if (videos.length > 0) return videos;
+    }
+  } catch (_) {}
+
+  const legacyPath = normalizeStoredVideo(row.preuve_video);
+  if (!legacyPath) return [];
+
+  return [{
+    path: legacyPath,
+    name: cleanVideoName(row.preuve_video_name) || 'Preuve vidéo',
+    type: allowedVideoTypes.has(String(row.preuve_video_type || '').toLowerCase())
+      ? String(row.preuve_video_type).toLowerCase()
+      : ''
+  }];
+};
+const serializeFacho = (row = {}) => {
+  const videos = parseStoredVideos(row);
+  const firstVideo = videos[0] || { path: '', name: '', type: '' };
+
+  return {
+    ...row,
+    preuves_videos: videos,
+    preuve_video: firstVideo.path,
+    preuve_video_name: firstVideo.name,
+    preuve_video_type: firstVideo.type
+  };
+};
 const APP_PASSWORD = process.env.APP_PASSWORD;
 const SESSION_SECRET = process.env.SESSION_SECRET || process.env.JWT_SECRET;
 const SESSION_COOKIE = process.env.SESSION_COOKIE || 'fachopol_session';
@@ -196,7 +314,28 @@ const fachoValidators = [
     .isIn(['a_verifier', 'verifie', 'rejete', 'doublon']).withMessage('Statut invalide'),
   body('categorie')
     .optional()
-    .isIn(allowedCategories).withMessage('Catégorie invalide')
+    .isIn(allowedCategories).withMessage('Catégorie invalide'),
+  body('preuve_video')
+    .optional({ checkFalsy: true })
+    .custom(value => normalizeStoredVideo(value) === value).withMessage('Chemin de vidéo invalide'),
+  body('preuve_video_name')
+    .optional({ checkFalsy: true })
+    .isLength({ max: 140 }).withMessage('Nom de vidéo trop long'),
+  body('preuve_video_type')
+    .optional({ checkFalsy: true })
+    .custom(value => allowedVideoTypes.has(String(value).toLowerCase())).withMessage('Type de vidéo invalide'),
+  body('preuves_videos')
+    .optional()
+    .isArray({ max: 20 }).withMessage('Maximum 20 vidéos par signalement'),
+  body('preuves_videos.*.path')
+    .optional({ checkFalsy: true })
+    .custom(value => normalizeStoredVideo(value) === value).withMessage('Chemin de vidéo invalide'),
+  body('preuves_videos.*.name')
+    .optional({ checkFalsy: true })
+    .isLength({ max: 140 }).withMessage('Nom de vidéo trop long'),
+  body('preuves_videos.*.type')
+    .optional({ checkFalsy: true })
+    .custom(value => allowedVideoTypes.has(String(value).toLowerCase())).withMessage('Type de vidéo invalide')
 ];
 
 // Middleware de base
@@ -204,8 +343,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cors({
   origin: process.env.CORS_ORIGIN || '*',
-  methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'x-api-key', 'Authorization'],
+  methods: ['GET', 'POST', 'PUT', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'X-File-Name', 'x-api-key', 'Authorization'],
   credentials: true
 }));
 
@@ -221,6 +360,7 @@ app.use(helmet({
       styleSrc: ["'self'", "https:", "'unsafe-inline'"],
       fontSrc: ["'self'", "https:", "data:"],
       imgSrc: ["'self'", "data:", "https:"],
+      mediaSrc: ["'self'"],
       connectSrc: ["'self'"],
       objectSrc: ["'none'"],
       baseUri: ["'self'"],
@@ -240,8 +380,9 @@ app.use(rateLimit({
     req.path === '/sw.js' ||
     req.path === '/manifest.json' ||
     req.path.startsWith('/img/') ||
+    req.path.startsWith('/uploads/') ||
     req.path.startsWith('/assets/') ||
-    /\.(?:css|js|png|jpg|jpeg|webp|svg|ico|woff2?)$/i.test(req.path)
+    /\.(?:css|js|png|jpg|jpeg|webp|svg|ico|woff2?|mp4|webm|mov|m4v)$/i.test(req.path)
   )
 }));
 
@@ -344,6 +485,92 @@ app.get('/api/session', (req, res) => {
 
 app.use(requireSession);
 
+app.post('/api/proofs/video', (req, res) => {
+  const contentType = String(req.headers['content-type'] || '').split(';')[0].toLowerCase();
+  if (!allowedVideoTypes.has(contentType)) {
+    return res.status(400).json({ error: 'Format vidéo non autorisé. Formats acceptés: MP4, WebM, MOV, M4V.' });
+  }
+
+  const extension = videoExtensionsByType[contentType];
+  const filename = `${crypto.randomUUID()}.${extension}`;
+  const filePath = path.join(UPLOAD_DIR, filename);
+  const originalName = cleanVideoName(decodeVideoName(req.headers['x-file-name'])) || `preuve-video.${extension}`;
+  const writeStream = fs.createWriteStream(filePath, { flags: 'wx' });
+  let uploadedBytes = 0;
+  let finished = false;
+
+  const cleanupFile = () => {
+    fs.unlink(filePath, () => {});
+  };
+
+  const failUpload = (status, message) => {
+    if (finished) return;
+    finished = true;
+    writeStream.destroy();
+    cleanupFile();
+    res.status(status).json({ error: message });
+  };
+
+  req.on('data', (chunk) => {
+    uploadedBytes += chunk.length;
+    if (uploadedBytes > VIDEO_UPLOAD_MAX_BYTES) {
+      req.unpipe(writeStream);
+      req.resume();
+      failUpload(413, `Vidéo trop lourde. Maximum: ${VIDEO_UPLOAD_MAX_MB} Mo.`);
+    }
+  });
+
+  req.on('aborted', () => {
+    if (!finished) {
+      finished = true;
+      writeStream.destroy();
+      cleanupFile();
+    }
+  });
+
+  writeStream.on('error', (error) => {
+    console.error('Erreur upload vidéo:', error);
+    failUpload(500, 'Erreur lors de l’enregistrement de la vidéo.');
+  });
+
+  writeStream.on('finish', () => {
+    if (finished) return;
+
+    if (uploadedBytes === 0) {
+      return failUpload(400, 'Fichier vidéo manquant.');
+    }
+
+    finished = true;
+    res.status(201).json({
+      path: `/uploads/${filename}`,
+      name: originalName,
+      type: contentType,
+      size: uploadedBytes
+    });
+  });
+
+  req.pipe(writeStream);
+});
+
+app.get('/uploads/:filename', (req, res) => {
+  const filename = path.basename(req.params.filename || '');
+  if (!/^[a-f0-9-]+\.(mp4|webm|mov|m4v)$/i.test(filename)) {
+    return res.status(404).send('Introuvable');
+  }
+
+  const filePath = path.join(UPLOAD_DIR, filename);
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).send('Introuvable');
+  }
+
+  const extension = path.extname(filename).slice(1).toLowerCase();
+  const contentType = Object.entries(videoExtensionsByType)
+    .find(([, mappedExtension]) => mappedExtension === extension)?.[0] || 'application/octet-stream';
+  res.type(contentType);
+  res.setHeader('Cache-Control', 'private, max-age=3600');
+  res.sendFile(filePath);
+});
+
 const isAllowedAvatarUrl = (value = '') => {
   try {
     const url = new URL(value);
@@ -431,7 +658,7 @@ app.use((err, req, res, next) => {
 app.get('/api/fachos', (req, res) => {
   try {
     console.log('Tentative de récupération des données...')
-    const fachos = db.prepare('SELECT * FROM fachos ORDER BY created_at DESC').all();
+    const fachos = db.prepare('SELECT * FROM fachos ORDER BY created_at DESC').all().map(serializeFacho);
     console.log(`✅ ${fachos.length} enregistrements trouvés`);
     res.json(fachos);
   } catch (error) {
@@ -453,6 +680,7 @@ app.post('/api/fachos', fachoValidators, async (req, res) => {
   const { pseudo, lien, preuve } = req.body;
   const status = req.body.status || 'a_verifier';
   const categorie = req.body.categorie || 'autre';
+  const { videos, videosJson, preuveVideo, preuveVideoName, preuveVideoType } = videoPayloadFromBody(req.body);
   
   if (!pseudo || !lien || !preuve) {
     return res.status(400).json({ error: 'Tous les champs sont requis' });
@@ -485,8 +713,23 @@ app.post('/api/fachos', fachoValidators, async (req, res) => {
   }
 
   try {
-    const insert = db.prepare('INSERT INTO fachos (pseudo, lien, preuve, avatar, nickname, status, categorie) VALUES (?, ?, ?, ?, ?, ?, ?)');
-    const result = insert.run(pseudo, lien, preuve, avatar, nickname, status, categorie);
+    const insert = db.prepare(`
+      INSERT INTO fachos (pseudo, lien, preuve, avatar, nickname, status, categorie, preuve_video, preuve_video_name, preuve_video_type, preuves_videos)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    const result = insert.run(
+      pseudo,
+      lien,
+      preuve,
+      avatar,
+      nickname,
+      status,
+      categorie,
+      preuveVideo,
+      preuveVideoName,
+      preuveVideoType,
+      videosJson
+    );
     
     res.status(201).json({
       id: result.lastInsertRowid,
@@ -497,6 +740,10 @@ app.post('/api/fachos', fachoValidators, async (req, res) => {
       nickname,
       status,
       categorie,
+      preuves_videos: videos,
+      preuve_video: preuveVideo,
+      preuve_video_name: preuveVideoName,
+      preuve_video_type: preuveVideoType,
       created_at: new Date().toISOString()
     });
   } catch (error) {
@@ -525,6 +772,7 @@ app.put('/api/fachos/:id', fachoValidators, async (req, res) => {
   const { pseudo, lien, preuve } = req.body;
   const status = req.body.status || 'a_verifier';
   const categorie = req.body.categorie || 'autre';
+  const { videosJson, preuveVideo, preuveVideoName, preuveVideoType } = videoPayloadFromBody(req.body, existing);
   const cleanPseudo = normalizePseudo(pseudo);
   const duplicate = db
     .prepare("SELECT id, pseudo FROM fachos WHERE lower(replace(pseudo, '@', '')) = ? AND id != ?")
@@ -558,16 +806,42 @@ app.put('/api/fachos/:id', fachoValidators, async (req, res) => {
   try {
     db.prepare(`
       UPDATE fachos
-      SET pseudo = ?, lien = ?, preuve = ?, avatar = ?, nickname = ?, status = ?, categorie = ?
+      SET pseudo = ?, lien = ?, preuve = ?, avatar = ?, nickname = ?, status = ?, categorie = ?,
+          preuve_video = ?, preuve_video_name = ?, preuve_video_type = ?, preuves_videos = ?
       WHERE id = ?
-    `).run(pseudo, lien, preuve, avatar, nickname, status, categorie, id);
+    `).run(
+      pseudo,
+      lien,
+      preuve,
+      avatar,
+      nickname,
+      status,
+      categorie,
+      preuveVideo,
+      preuveVideoName,
+      preuveVideoType,
+      videosJson,
+      id
+    );
 
-    const updated = db.prepare('SELECT * FROM fachos WHERE id = ?').get(id);
+    const updated = serializeFacho(db.prepare('SELECT * FROM fachos WHERE id = ?').get(id));
     res.json(updated);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Erreur lors de la modification' });
   }
+});
+
+app.use((err, req, res, next) => {
+  if (err.type === 'entity.too.large') {
+    return res.status(413).json({ error: `Vidéo trop lourde. Maximum: ${VIDEO_UPLOAD_MAX_MB} Mo.` });
+  }
+
+  console.error('Erreur serveur:', err);
+  res.status(500).json({
+    error: 'Erreur serveur',
+    details: err.message
+  });
 });
 
 // Placer la route catch-all tout à la fin, après toutes les autres routes

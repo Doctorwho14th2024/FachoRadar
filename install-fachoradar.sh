@@ -150,6 +150,8 @@ write_env() {
     set_env_value "$env_file" CORS_ORIGIN '*'
     set_env_value "$env_file" PORT "$PORT"
     set_env_value "$env_file" DB_PATH /app/data/database.db
+    set_env_value "$env_file" RATE_LIMIT_MAX 1500
+    set_env_value "$env_file" VIDEO_UPLOAD_MAX_MB 5120
     set_env_value "$env_file" TRUST_PROXY 1
     set_env_value "$env_file" PUBLIC_URL "$PUBLIC_URL"
     set_env_value "$env_file" COOKIE_SECURE auto
@@ -170,6 +172,8 @@ NODE_ENV=production
 CORS_ORIGIN=*
 PORT=$PORT
 DB_PATH=/app/data/database.db
+RATE_LIMIT_MAX=1500
+VIDEO_UPLOAD_MAX_MB=5120
 
 # Reverse proxy / Pangolin
 TRUST_PROXY=1
@@ -204,6 +208,8 @@ services:
     environment:
       - PORT=3000
       - DB_PATH=/app/data/database.db
+      - RATE_LIMIT_MAX=\${RATE_LIMIT_MAX:-1500}
+      - VIDEO_UPLOAD_MAX_MB=\${VIDEO_UPLOAD_MAX_MB:-5120}
     volumes:
       - fachopol_data:/app/data
     healthcheck:

@@ -18,6 +18,8 @@ services:
       - COOKIE_DOMAIN=${COOKIE_DOMAIN:-}
       - COOKIE_SECURE=${COOKIE_SECURE:-auto}
       - COOKIE_SAMESITE=${COOKIE_SAMESITE:-Lax}
+      - RATE_LIMIT_MAX=${RATE_LIMIT_MAX:-1500}
+      - VIDEO_UPLOAD_MAX_MB=${VIDEO_UPLOAD_MAX_MB:-5120}
     volumes:
       # Persistance de la base de données SQLite
       - fachopol_data:/app/data

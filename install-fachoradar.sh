@@ -283,9 +283,11 @@ main() {
   fi
 
   printf '\n'
-  printf 'URL locale: http://localhost:%s\n' "$DISPLAY_PORT"
   if [ -n "$DISPLAY_PUBLIC_URL" ]; then
     printf 'URL publique: %s\n' "$DISPLAY_PUBLIC_URL"
+    printf 'Cible reverse proxy: http://127.0.0.1:%s\n' "$DISPLAY_PORT"
+  else
+    printf 'URL locale: http://localhost:%s\n' "$DISPLAY_PORT"
   fi
   if [ -n "$DISPLAY_APP_PASSWORD" ]; then
     printf 'Mot de passe app: %s\n' "$DISPLAY_APP_PASSWORD"

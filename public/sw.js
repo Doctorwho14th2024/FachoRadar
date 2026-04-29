@@ -1,7 +1,5 @@
-const CACHE_NAME = 'fachopol-v2';
+const CACHE_NAME = 'fachopol-v3';
 const STATIC_ASSETS = [
-  '/',
-  '/index.html',
   '/manifest.json',
   '/img/logo.png',
   '/img/favicon.png'
@@ -27,7 +25,7 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Fetch — Network-first pour l'API, Cache-first pour les statiques
+// Fetch — réseau direct pour l'app protégée, cache seulement pour les assets publics.
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
@@ -44,21 +42,13 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Network-first pour les pages HTML afin d'éviter une app bloquée sur un vieux build.
+  // Les pages HTML sont protégées par connexion : ne jamais les mettre en cache.
   if (event.request.mode === 'navigate' || event.request.headers.get('accept')?.includes('text/html')) {
-    event.respondWith(
-      fetch(event.request)
-        .then((response) => {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
-          return response;
-        })
-        .catch(() => caches.match(event.request).then((cached) => cached || caches.match('/index.html')))
-    );
+    event.respondWith(fetch(event.request));
     return;
   }
 
-  // Cache-first pour les assets statiques versionnés
+  // Cache-first pour les assets publics uniquement.
   event.respondWith(
     caches.match(event.request).then((cached) => {
       if (cached) return cached;
@@ -67,7 +57,7 @@ self.addEventListener('fetch', (event) => {
         const clone = response.clone();
         caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
         return response;
-      }).catch(() => caches.match('/index.html'));
+      }).catch(() => new Response('', { status: 503 }));
     })
   );
 });

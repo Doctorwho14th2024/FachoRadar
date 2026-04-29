@@ -156,6 +156,26 @@ docker compose logs --tail=80 fachopol
 
 Si `/health` répond en local mais Pangolin affiche encore `no available server`, corrigez la cible upstream dans Pangolin vers `http://IP_DU_SERVEUR:3000` ou mettez Pangolin et Fachopol sur le même réseau Docker.
 
+Méthode la plus fiable avec Hawser en conteneur :
+
+```bash
+docker network ls
+docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.Status}}'
+docker network connect fachoradar-deploy_default hawser
+```
+
+Adaptez `fachoradar-deploy_default` si votre réseau Compose a un autre nom, et adaptez `hawser` si le conteneur Hawser porte un autre nom. Ensuite, dans Pangolin, utilisez cette cible :
+
+```text
+http://fachopol:3000
+```
+
+Vous pouvez tester depuis Hawser :
+
+```bash
+docker exec hawser wget -qO- http://fachopol:3000/health
+```
+
 Si la connexion revient immédiatement sur `/login`, vérifiez la configuration cookie dans `.env` :
 
 ```env

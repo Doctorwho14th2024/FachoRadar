@@ -287,6 +287,8 @@ main() {
     printf 'URL publique: %s\n' "$DISPLAY_PUBLIC_URL"
     printf 'Cible reverse proxy sur la meme machine: http://127.0.0.1:%s\n' "$DISPLAY_PORT"
     printf 'Cible Pangolin/Hawser en conteneur: http://IP_DU_SERVEUR:%s\n' "$DISPLAY_PORT"
+    printf 'Cible Pangolin si Hawser est connecte au reseau Docker Fachopol: http://fachopol:3000\n'
+    printf 'Commande reseau utile: docker network connect fachoradar-deploy_default hawser\n'
     printf 'Note: ne pointez pas Pangolin vers 127.0.0.1 depuis son conteneur, ni vers une IP Docker 172.x instable.\n'
   else
     printf 'URL locale: http://localhost:%s\n' "$DISPLAY_PORT"

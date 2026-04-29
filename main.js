@@ -16,6 +16,11 @@ function escapeHTML(str) {
   return div.innerHTML;
 }
 
+function avatarSrc(url = '') {
+  if (!url) return ''
+  return `${API_URL}/avatar?url=${encodeURIComponent(url)}`
+}
+
 const connectionStatus = document.getElementById('connectionStatus')
 const form = document.getElementById('fachoForm')
 const formTitle = document.getElementById('formTitle')
@@ -287,7 +292,7 @@ function renderList() {
               <svg class="w-5 h-5 text-red-500/60 absolute" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
-              ${f.avatar ? `<img src="${escapeHTML(f.avatar)}" alt="Avatar" class="avatar-img w-full h-full object-cover relative z-10">` : ''}
+              ${f.avatar ? `<img src="${escapeHTML(avatarSrc(f.avatar))}" alt="Avatar" class="avatar-img w-full h-full object-cover relative z-10">` : ''}
             </div>
             <div>
               <h3 class="text-base font-bold text-white font-['Outfit'] leading-tight">${escapeHTML(f.nickname || f.pseudo)}</h3>

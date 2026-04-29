@@ -333,6 +333,60 @@ app.get('/api/session', (req, res) => {
 
 app.use(requireSession);
 
+const isAllowedAvatarUrl = (value = '') => {
+  try {
+    const url = new URL(value);
+    const hostname = url.hostname.toLowerCase();
+    return url.protocol === 'https:' && (
+      hostname.includes('tiktokcdn') ||
+      hostname.includes('muscdn') ||
+      hostname.endsWith('musical.ly') ||
+      hostname.endsWith('byteoversea.com')
+    );
+  } catch (_) {
+    return false;
+  }
+};
+
+app.get('/api/avatar', async (req, res) => {
+  const avatarUrl = String(req.query.url || '');
+  if (!isAllowedAvatarUrl(avatarUrl)) {
+    return res.status(400).json({ error: 'URL avatar invalide' });
+  }
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 6000);
+
+  try {
+    const response = await fetch(avatarUrl, {
+      signal: controller.signal,
+      headers: {
+        'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+        'User-Agent': 'Mozilla/5.0 Fachopol/1.0'
+      }
+    });
+
+    if (!response.ok) {
+      return res.status(502).json({ error: 'Avatar indisponible' });
+    }
+
+    const contentType = response.headers.get('content-type') || 'image/webp';
+    if (!contentType.startsWith('image/')) {
+      return res.status(502).json({ error: 'Réponse avatar invalide' });
+    }
+
+    const buffer = Buffer.from(await response.arrayBuffer());
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Cache-Control', 'private, max-age=3600');
+    res.send(buffer);
+  } catch (error) {
+    const status = error.name === 'AbortError' ? 504 : 502;
+    res.status(status).json({ error: 'Avatar indisponible' });
+  } finally {
+    clearTimeout(timeout);
+  }
+});
+
 // Servir l'application uniquement après connexion
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, 'dist')));

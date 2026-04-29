@@ -108,6 +108,7 @@ chmod +x install-fachoradar.sh
 ```
 
 Le script crée un dossier de déploiement autonome avec `.env`, `docker-compose.yml`, secrets générés, configuration Pangolin/reverse proxy et image `liberchat/fachoradar:latest`.
+Il demande interactivement le dossier, le port, le domaine, l'URL publique, le domaine cookie et le mot de passe. Si `.env` existe déjà, il met à jour ces valeurs sans supprimer les autres réglages.
 
 Copier le fichier d'environnement :
 

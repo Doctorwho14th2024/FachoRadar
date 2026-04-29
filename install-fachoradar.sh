@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+PRESET_PORT="${PORT-}"
+PRESET_DOMAIN="${DOMAIN-}"
+PRESET_PUBLIC_URL="${PUBLIC_URL-}"
+PRESET_COOKIE_DOMAIN="${COOKIE_DOMAIN-}"
+PRESET_APP_PASSWORD="${APP_PASSWORD-}"
+
 IMAGE="${IMAGE:-liberchat/fachoradar:latest}"
 APP_DIR="${APP_DIR:-./fachoradar-deploy}"
 PORT="${PORT:-3000}"
@@ -8,6 +14,7 @@ DOMAIN="${DOMAIN:-}"
 PUBLIC_URL="${PUBLIC_URL:-}"
 COOKIE_DOMAIN="${COOKIE_DOMAIN:-}"
 START_APP="${START_APP:-yes}"
+AUTO="${AUTO:-no}"
 
 banner() {
   cat <<'EOF_BANNER'
@@ -68,21 +75,55 @@ env_value() {
   ' "$env_file"
 }
 
+set_env_value() {
+  local env_file="$1"
+  local key="$2"
+  local value="$3"
+  local tmp_file
+
+  tmp_file="$(mktemp)"
+  if [ -f "$env_file" ] && grep -q "^${key}=" "$env_file"; then
+    awk -v key="$key" -v value="$value" '
+      BEGIN { updated = 0 }
+      $0 ~ "^" key "=" {
+        print key "=" value
+        updated = 1
+        next
+      }
+      { print }
+      END {
+        if (!updated) print key "=" value
+      }
+    ' "$env_file" > "$tmp_file"
+  else
+    [ -f "$env_file" ] && cat "$env_file" > "$tmp_file"
+    printf '%s=%s\n' "$key" "$value" >> "$tmp_file"
+  fi
+
+  mv "$tmp_file" "$env_file"
+}
+
 ask() {
   local var_name="$1"
   local prompt="$2"
   local default_value="$3"
   local value
 
-  if [ -n "${!var_name:-}" ]; then
+  if [ "$AUTO" = "yes" ]; then
+    return
+  fi
+
+  if [ ! -r /dev/tty ]; then
+    warn "Pas de terminal interactif detecte, valeur par defaut conservee pour: $prompt"
+    printf -v "$var_name" '%s' "$default_value"
     return
   fi
 
   if [ -n "$default_value" ]; then
-    read -r -p "$prompt [$default_value]: " value || true
+    read -r -p "$prompt [$default_value]: " value < /dev/tty || true
     value="${value:-$default_value}"
   else
-    read -r -p "$prompt: " value || true
+    read -r -p "$prompt: " value < /dev/tty || true
   fi
 
   printf -v "$var_name" '%s' "$value"
@@ -92,7 +133,30 @@ write_env() {
   local env_file="$APP_DIR/.env"
 
   if [ -f "$env_file" ]; then
-    warn "$env_file existe deja, il ne sera pas ecrase."
+    warn "$env_file existe deja, mise a jour des valeurs de configuration."
+    if [ -n "${APP_PASSWORD:-}" ]; then
+      set_env_value "$env_file" APP_PASSWORD "$APP_PASSWORD"
+    elif [ -z "$(env_value "$env_file" APP_PASSWORD)" ]; then
+      set_env_value "$env_file" APP_PASSWORD "$(random_secret | cut -c1-32)"
+    fi
+
+    if [ -n "${SESSION_SECRET:-}" ]; then
+      set_env_value "$env_file" SESSION_SECRET "$SESSION_SECRET"
+    elif [ -z "$(env_value "$env_file" SESSION_SECRET)" ]; then
+      set_env_value "$env_file" SESSION_SECRET "$(random_secret)"
+    fi
+
+    set_env_value "$env_file" NODE_ENV production
+    set_env_value "$env_file" CORS_ORIGIN '*'
+    set_env_value "$env_file" PORT "$PORT"
+    set_env_value "$env_file" DB_PATH /app/data/database.db
+    set_env_value "$env_file" TRUST_PROXY 1
+    set_env_value "$env_file" PUBLIC_URL "$PUBLIC_URL"
+    set_env_value "$env_file" COOKIE_SECURE auto
+    set_env_value "$env_file" COOKIE_SAMESITE Lax
+    set_env_value "$env_file" COOKIE_DOMAIN "$COOKIE_DOMAIN"
+    set_env_value "$env_file" DOMAIN "$DOMAIN"
+    chmod 600 "$env_file"
     return
   fi
 
@@ -165,6 +229,27 @@ main() {
   fi
 
   ask APP_DIR "Dossier de deploiement" "$APP_DIR"
+
+  mkdir -p "$APP_DIR"
+  env_file="$APP_DIR/.env"
+
+  if [ -f "$env_file" ]; then
+    PORT="$(env_value "$env_file" PORT || true)"
+    DOMAIN="$(env_value "$env_file" DOMAIN || true)"
+    PUBLIC_URL="$(env_value "$env_file" PUBLIC_URL || true)"
+    COOKIE_DOMAIN="$(env_value "$env_file" COOKIE_DOMAIN || true)"
+    PORT="${PORT:-3000}"
+    DOMAIN="${DOMAIN:-}"
+    PUBLIC_URL="${PUBLIC_URL:-}"
+    COOKIE_DOMAIN="${COOKIE_DOMAIN:-}"
+  fi
+
+  [ -n "$PRESET_PORT" ] && PORT="$PRESET_PORT"
+  [ -n "$PRESET_DOMAIN" ] && DOMAIN="$PRESET_DOMAIN"
+  [ -n "$PRESET_PUBLIC_URL" ] && PUBLIC_URL="$PRESET_PUBLIC_URL"
+  [ -n "$PRESET_COOKIE_DOMAIN" ] && COOKIE_DOMAIN="$PRESET_COOKIE_DOMAIN"
+  [ -n "$PRESET_APP_PASSWORD" ] && APP_PASSWORD="$PRESET_APP_PASSWORD"
+
   ask PORT "Port local a exposer" "$PORT"
   ask DOMAIN "Domaine public, optionnel" "$DOMAIN"
 
@@ -174,8 +259,8 @@ main() {
 
   ask PUBLIC_URL "URL publique, optionnel" "$PUBLIC_URL"
   ask COOKIE_DOMAIN "Domaine cookie partage, optionnel (.example.com)" "$COOKIE_DOMAIN"
+  ask APP_PASSWORD "Mot de passe app, optionnel (vide = conserver/generer)" "${APP_PASSWORD:-}"
 
-  mkdir -p "$APP_DIR"
   write_env
   write_compose
 

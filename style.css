@@ -23,11 +23,22 @@
 ───────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
 
+html {
+  background-color: #050505;
+}
+
 body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background-color: #080808;
+  background-color: #050505;
   color: #e8e8e8;
   -webkit-font-smoothing: antialiased;
+  overscroll-behavior-y: none;
+}
+
+@media all and (display-mode: standalone), all and (display-mode: fullscreen) {
+  body {
+    background-color: #050505;
+  }
 }
 
 /* ─────────────────────────────────────────

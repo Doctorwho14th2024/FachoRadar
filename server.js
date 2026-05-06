@@ -586,10 +586,59 @@ const isAllowedAvatarUrl = (value = '') => {
   }
 };
 
-app.get('/api/avatar', async (req, res) => {
-  const avatarUrl = String(req.query.url || '');
+const AVATAR_FETCH_HEADERS = {
+  'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+  'Accept-Language': 'fr-FR,fr;q=0.9,en;q=0.8',
+  'Referer': 'https://www.tiktok.com/',
+  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36'
+};
+
+const AVATAR_PLACEHOLDER_SVG = `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96">
+  <rect width="96" height="96" rx="48" fill="#1f2937"/>
+  <circle cx="48" cy="35" r="16" fill="#ef4444" opacity=".65"/>
+  <path d="M20 82c4.5-17 15-26 28-26s23.5 9 28 26" fill="#ef4444" opacity=".45"/>
+</svg>`;
+
+const fetchTikTokUserInfo = async (cleanPseudo = '') => {
+  if (!cleanPseudo) return null;
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 6000);
+
+  try {
+    const tikRes = await fetch(
+      `https://www.tikwm.com/api/user/info?unique_id=${encodeURIComponent(cleanPseudo)}`,
+      {
+        signal: controller.signal,
+        headers: {
+          'Accept': 'application/json',
+          'User-Agent': AVATAR_FETCH_HEADERS['User-Agent']
+        }
+      }
+    );
+
+    if (!tikRes.ok) return null;
+
+    const tikData = await tikRes.json();
+    if (tikData.code === 0 && tikData.data && tikData.data.user) {
+      return {
+        avatar: tikData.data.user.avatarMedium || '',
+        nickname: tikData.data.user.nickname || ''
+      };
+    }
+  } catch (err) {
+    console.warn('⚠️ Impossible de récupérer les infos TikTok:', err.message);
+  } finally {
+    clearTimeout(timeout);
+  }
+
+  return null;
+};
+
+const fetchAvatarImage = async (avatarUrl = '') => {
   if (!isAllowedAvatarUrl(avatarUrl)) {
-    return res.status(400).json({ error: 'URL avatar invalide' });
+    throw new Error('URL avatar invalide');
   }
 
   const controller = new AbortController();
@@ -598,31 +647,89 @@ app.get('/api/avatar', async (req, res) => {
   try {
     const response = await fetch(avatarUrl, {
       signal: controller.signal,
-      headers: {
-        'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
-        'User-Agent': 'Mozilla/5.0 Fachopol/1.0'
-      }
+      headers: AVATAR_FETCH_HEADERS,
+      redirect: 'follow'
     });
 
     if (!response.ok) {
-      return res.status(502).json({ error: 'Avatar indisponible' });
+      throw new Error(`Avatar indisponible (${response.status})`);
     }
 
     const contentType = response.headers.get('content-type') || 'image/webp';
     if (!contentType.startsWith('image/')) {
-      return res.status(502).json({ error: 'Réponse avatar invalide' });
+      throw new Error('Réponse avatar invalide');
     }
 
-    const buffer = Buffer.from(await response.arrayBuffer());
-    res.setHeader('Content-Type', contentType);
-    res.setHeader('Cache-Control', 'private, max-age=3600');
-    res.send(buffer);
-  } catch (error) {
-    const status = error.name === 'AbortError' ? 504 : 502;
-    res.status(status).json({ error: 'Avatar indisponible' });
+    return {
+      buffer: Buffer.from(await response.arrayBuffer()),
+      contentType
+    };
   } finally {
     clearTimeout(timeout);
   }
+};
+
+const sendAvatarImage = (res, avatarImage) => {
+  res.setHeader('Content-Type', avatarImage.contentType);
+  res.setHeader('Cache-Control', 'private, max-age=3600');
+  res.send(avatarImage.buffer);
+};
+
+const sendAvatarPlaceholder = (res) => {
+  res.status(200);
+  res.setHeader('Content-Type', 'image/svg+xml; charset=utf-8');
+  res.setHeader('Cache-Control', 'private, max-age=300');
+  res.setHeader('X-Avatar-Fallback', '1');
+  res.send(AVATAR_PLACEHOLDER_SVG);
+};
+
+const redirectToAvatar = (res, avatarUrl = '') => {
+  res.setHeader('Cache-Control', 'private, max-age=300');
+  res.redirect(302, avatarUrl);
+};
+
+app.get('/api/avatar', async (req, res) => {
+  const avatarUrl = String(req.query.url || '');
+  const cleanPseudo = normalizePseudo(String(req.query.pseudo || ''));
+  let fallbackAvatarUrl = isAllowedAvatarUrl(avatarUrl) ? avatarUrl : '';
+
+  if (!avatarUrl && !cleanPseudo) {
+    return res.status(400).json({ error: 'URL avatar invalide' });
+  }
+
+  if (avatarUrl) {
+    try {
+      return sendAvatarImage(res, await fetchAvatarImage(avatarUrl));
+    } catch (error) {
+      console.warn('⚠️ Avatar stocké indisponible:', error.message);
+    }
+  }
+
+  if (cleanPseudo) {
+    const tikUser = await fetchTikTokUserInfo(cleanPseudo);
+    const freshAvatar = tikUser?.avatar || '';
+
+    if (isAllowedAvatarUrl(freshAvatar)) {
+      fallbackAvatarUrl = freshAvatar;
+      try {
+        const avatarImage = await fetchAvatarImage(freshAvatar);
+        db.prepare(`
+          UPDATE fachos
+          SET avatar = ?, nickname = CASE WHEN ? != '' THEN ? ELSE nickname END
+          WHERE lower(replace(pseudo, '@', '')) = ?
+        `).run(freshAvatar, tikUser.nickname || '', tikUser.nickname || '', cleanPseudo);
+        return sendAvatarImage(res, avatarImage);
+      } catch (error) {
+        console.warn('⚠️ Avatar TikTok rafraîchi indisponible:', error.message);
+      }
+    }
+  }
+
+  if (fallbackAvatarUrl) {
+    return redirectToAvatar(res, fallbackAvatarUrl);
+  }
+
+  return sendAvatarPlaceholder(res);
 });
 
 // Servir l'application uniquement après connexion
@@ -701,15 +808,10 @@ app.post('/api/fachos', fachoValidators, async (req, res) => {
   let avatar = '';
   let nickname = pseudo;
 
-  try {
-    const tikRes = await fetch(`https://www.tikwm.com/api/user/info?unique_id=${cleanPseudo}`);
-    const tikData = await tikRes.json();
-    if (tikData.code === 0 && tikData.data && tikData.data.user) {
-      avatar = tikData.data.user.avatarMedium || '';
-      nickname = tikData.data.user.nickname || pseudo;
-    }
-  } catch (err) {
-    console.warn('⚠️ Impossible de récupérer les infos TikTok:', err.message);
+  const tikUser = await fetchTikTokUserInfo(cleanPseudo);
+  if (tikUser) {
+    avatar = tikUser.avatar || '';
+    nickname = tikUser.nickname || pseudo;
   }
 
   try {
@@ -791,15 +893,10 @@ app.put('/api/fachos/:id', fachoValidators, async (req, res) => {
   if (normalizePseudo(existing.pseudo) !== cleanPseudo) {
     avatar = '';
     nickname = pseudo;
-    try {
-      const tikRes = await fetch(`https://www.tikwm.com/api/user/info?unique_id=${cleanPseudo}`);
-      const tikData = await tikRes.json();
-      if (tikData.code === 0 && tikData.data && tikData.data.user) {
-        avatar = tikData.data.user.avatarMedium || '';
-        nickname = tikData.data.user.nickname || pseudo;
-      }
-    } catch (err) {
-      console.warn('⚠️ Impossible de récupérer les infos TikTok:', err.message);
+    const tikUser = await fetchTikTokUserInfo(cleanPseudo);
+    if (tikUser) {
+      avatar = tikUser.avatar || '';
+      nickname = tikUser.nickname || pseudo;
     }
   }
 
